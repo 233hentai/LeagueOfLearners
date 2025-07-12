@@ -1,0 +1,26 @@
+[
+	{
+		"file": "D:\\UnrealProjects\\LeagueOfLearners\\Source\\LeagueOfLearners\\LeagueOfLearners.Build.cs",
+		"arguments": [
+			"D:\\Program Files\\Microsoft\\Visual Studio\\IDE\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\UnrealProjects\\LeagueOfLearners\\.vscode\\compileCommands_Default\\LeagueOfLearners.1.rsp"
+		],
+		"directory": "E:\\Program Files\\UE_5.4\\Engine\\Source"
+	},
+	{
+		"file": "D:\\UnrealProjects\\LeagueOfLearners\\Source\\LeagueOfLearners\\LeagueOfLearners.cpp",
+		"arguments": [
+			"D:\\Program Files\\Microsoft\\Visual Studio\\IDE\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\UnrealProjects\\LeagueOfLearners\\.vscode\\compileCommands_Default\\LeagueOfLearners.1.rsp"
+		],
+		"directory": "E:\\Program Files\\UE_5.4\\Engine\\Source"
+	},
+	{
+		"file": "D:\\UnrealProjects\\LeagueOfLearners\\Source\\LeagueOfLearners\\LeagueOfLearners.h",
+		"arguments": [
+			"D:\\Program Files\\Microsoft\\Visual Studio\\IDE\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe",
+			"@D:\\UnrealProjects\\LeagueOfLearners\\.vscode\\compileCommands_Default\\LeagueOfLearners.1.rsp"
+		],
+		"directory": "E:\\Program Files\\UE_5.4\\Engine\\Source"
+	}
+]
