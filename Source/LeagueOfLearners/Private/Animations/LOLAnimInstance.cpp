@@ -23,6 +23,12 @@ void ULOLAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		BodyRotationPrevious = BodyRotation;
 		YawSpeed = BodyRotationDelta.Yaw / DeltaSeconds;
 		SmoothedYawSpeed = UKismetMathLibrary::FInterpTo(SmoothedYawSpeed,YawSpeed,DeltaSeconds,YawSpeedSmoothLerpSpeed);
+
+		FRotator ControlRotation = OwnerCharacter->GetBaseAimRotation();
+		LookRotationOffset = UKismetMathLibrary::NormalizedDeltaRotator(ControlRotation,BodyRotation);
+	}
+	if (OwnerMovementComponent) {
+		bIsJumping = OwnerMovementComponent->IsFalling();
 	}
 }
 
