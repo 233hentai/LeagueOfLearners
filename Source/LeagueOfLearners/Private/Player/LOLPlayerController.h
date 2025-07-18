@@ -14,4 +14,14 @@ class ALOLPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+public:
+	//仅服务器端调用
+	void OnPossess(APawn* NewPawn) override;
+
+	//仅客户端调用
+	void AcknowledgePossession(APawn* NewPawn) override;
+
+private:
+	UPROPERTY()
+	class ALOLPlayerCharacter* LOLPlayerCharacter;
 };

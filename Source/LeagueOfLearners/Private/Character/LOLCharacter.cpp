@@ -3,13 +3,28 @@
 
 #include "Character/LOLCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
-
+#include "GAS/LOLAbilitySystemComponent.h"
+#include "GAS/LOLAttributeSet.h"
 // Sets default values
 ALOLCharacter::ALOLCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	LOLAbilitySystemComponent = CreateDefaultSubobject<ULOLAbilitySystemComponent>("LOLAbility System Component");
+	LOLAttributeSet = CreateDefaultSubobject<ULOLAttributeSet>("LOLAttribute Set");
+}
+
+void ALOLCharacter::ServerSideInit()
+{
+	LOLAbilitySystemComponent->InitAbilityActorInfo(this,this);
+	LOLAbilitySystemComponent->ApplyInitialEffects();
+}
+
+void ALOLCharacter::ClientSideInit()
+{
+	LOLAbilitySystemComponent->InitAbilityActorInfo(this,this);
 }
 
 // Called when the game starts or when spawned
@@ -31,5 +46,10 @@ void ALOLCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+UAbilitySystemComponent* ALOLCharacter::GetAbilitySystemComponent() const
+{
+	return LOLAbilitySystemComponent;
 }
 
