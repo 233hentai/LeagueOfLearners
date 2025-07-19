@@ -3,8 +3,11 @@
 
 #include "Character/LOLCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GAS/LOLAbilitySystemComponent.h"
 #include "GAS/LOLAttributeSet.h"
+#include "Widgets/OverHeadStatsGauge.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 ALOLCharacter::ALOLCharacter()
 {
@@ -14,6 +17,8 @@ ALOLCharacter::ALOLCharacter()
 
 	LOLAbilitySystemComponent = CreateDefaultSubobject<ULOLAbilitySystemComponent>("LOLAbility System Component");
 	LOLAttributeSet = CreateDefaultSubobject<ULOLAttributeSet>("LOLAttribute Set");
+	OverHeadWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("Over Head Widget Component");
+	OverHeadWidgetComponent->SetupAttachment(GetRootComponent());
 }
 
 void ALOLCharacter::ServerSideInit()
@@ -27,10 +32,24 @@ void ALOLCharacter::ClientSideInit()
 	LOLAbilitySystemComponent->InitAbilityActorInfo(this,this);
 }
 
+bool ALOLCharacter::IsControlledByLocalPlayer() const
+{
+	return GetController()&&GetController()->IsLocalController();
+}
+
+void ALOLCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	if (NewController && !NewController->IsPlayerController()) {
+		ServerSideInit();
+	}
+}
+
 // Called when the game starts or when spawned
 void ALOLCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	ConfigureOverHeadStatsWidget();
 	
 }
 
@@ -51,5 +70,33 @@ void ALOLCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 UAbilitySystemComponent* ALOLCharacter::GetAbilitySystemComponent() const
 {
 	return LOLAbilitySystemComponent;
+}
+
+void ALOLCharacter::ConfigureOverHeadStatsWidget()
+{
+	if (OverHeadWidgetComponent) {
+		if (IsControlledByLocalPlayer()) {
+			OverHeadWidgetComponent->SetHiddenInGame(true);
+			return;
+		}
+		UOverHeadStatsGauge* OverHeadStatsGauge = Cast<UOverHeadStatsGauge>(OverHeadWidgetComponent->GetUserWidgetObject());
+		if (OverHeadStatsGauge) {
+			OverHeadStatsGauge->ConfigureWithASC(GetAbilitySystemComponent());
+			OverHeadWidgetComponent->SetHiddenInGame(false);
+			GetWorldTimerManager().ClearTimer(OverHeadStatsGaugeVisibilityHandle);
+			GetWorldTimerManager().SetTimer(OverHeadStatsGaugeVisibilityHandle, this, &ALOLCharacter::UpdateHeadStatsGaugeVisibility, HeadStatsGaugeVisibilityCheckGap, true);
+
+		}
+	}
+	
+}
+
+void ALOLCharacter::UpdateHeadStatsGaugeVisibility()
+{
+	APawn* LocalPlayerPawn = UGameplayStatics::GetPlayerPawn(this,0);
+	if (LocalPlayerPawn) {
+		float DistanceSquared = FVector::DistSquared(GetActorLocation(), LocalPlayerPawn->GetActorLocation());
+		OverHeadWidgetComponent->SetHiddenInGame(DistanceSquared>HeadStatsGaugeVisibilityRangeSquared);
+	}
 }
 

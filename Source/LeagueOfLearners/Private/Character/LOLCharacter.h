@@ -17,6 +17,9 @@ public:
 	ALOLCharacter();
 	void ServerSideInit();
 	void ClientSideInit();
+	bool IsControlledByLocalPlayer() const;
+	//仅在服务器端调用
+	virtual void PossessedBy(AController* NewController) override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -29,15 +32,30 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-/******************/
-/*Gameplay Ability*/
-/*****************/
+/*******************************************************************/
+/*                       Gameplay Ability                          */
+/*******************************************************************/
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 private:
-	UPROPERTY(VisibleDefaultsOnly, Category = "Gameplay Ability")
+	UPROPERTY(VisibleDefaultsOnly, Category = "UI")
 	class ULOLAbilitySystemComponent* LOLAbilitySystemComponent;
 	UPROPERTY()
 	class ULOLAttributeSet* LOLAttributeSet;
+
+/*******************************************************************/
+/*                              UI                                 */
+/*******************************************************************/
+private:
+	UPROPERTY(VisibleDefaultsOnly, Category = "Gameplay Ability")
+	class UWidgetComponent* OverHeadWidgetComponent;
+	void ConfigureOverHeadStatsWidget();
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	float HeadStatsGaugeVisibilityCheckGap = 1.f;
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	float HeadStatsGaugeVisibilityRangeSquared = 1000000.f;//距离的平方而不是距离，少一次开方运算
+	FTimerHandle OverHeadStatsGaugeVisibilityHandle;
+	void UpdateHeadStatsGaugeVisibility();
 };
