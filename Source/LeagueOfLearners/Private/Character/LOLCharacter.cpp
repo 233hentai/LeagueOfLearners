@@ -25,6 +25,7 @@ void ALOLCharacter::ServerSideInit()
 {
 	LOLAbilitySystemComponent->InitAbilityActorInfo(this,this);
 	LOLAbilitySystemComponent->ApplyInitialEffects();
+	LOLAbilitySystemComponent->GiveInitialAbilities();
 }
 
 void ALOLCharacter::ClientSideInit()

@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "AbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ALOLPlayerCharacter::ALOLPlayerCharacter()
@@ -45,6 +46,10 @@ void ALOLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(JumpInputAction,ETriggerEvent::Triggered,this,&ALOLPlayerCharacter::Jump);
 		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &ALOLPlayerCharacter::HandleLookInput);
 		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &ALOLPlayerCharacter::HandleMoveInput);
+
+		for (const TPair<ELOLAbilityInputID, class UInputAction*> InputActionPair : GameplayAbilityInputActions) {
+			EnhancedInputComponent->BindAction(InputActionPair.Value, ETriggerEvent::Triggered, this, &ALOLPlayerCharacter::HandleAbilityInput, InputActionPair.Key);
+		}
 	}
 }
 
@@ -60,6 +65,17 @@ void ALOLPlayerCharacter::HandleMoveInput(const FInputActionValue& InputActionVa
 	FVector2D InputValue = InputActionValue.Get<FVector2D>();
 	InputValue.Normalize();
 	AddMovementInput(GetMoveForwardDirection()*InputValue.Y+GetLookRightDirection()*InputValue.X);
+}
+
+void ALOLPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionValue, ELOLAbilityInputID InputID)
+{
+	bool bPressed = InputActionValue.Get<bool>();
+	if (bPressed) {
+		GetAbilitySystemComponent()->AbilityLocalInputPressed((int32)InputID);
+	}
+	else {
+		GetAbilitySystemComponent()->AbilityLocalInputReleased((int32)InputID);
+	}
 }
 
 FVector ALOLPlayerCharacter::GetLookRightDirection() const

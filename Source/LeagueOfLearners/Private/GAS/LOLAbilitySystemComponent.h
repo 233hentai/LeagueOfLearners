@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
+#include "GAS/LOLGameplayAbilityTypes.h"
 #include "LOLAbilitySystemComponent.generated.h"
 
 /**
@@ -16,8 +17,14 @@ class ULOLAbilitySystemComponent : public UAbilitySystemComponent
 
 public:
 	void ApplyInitialEffects();
+	void GiveInitialAbilities();
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
 	TArray<TSubclassOf<UGameplayEffect>> InitialEffects;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Ability")
+	TMap<ELOLAbilityInputID,TSubclassOf<UGameplayAbility>> Abilities;
+	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Ability")
+	TMap<ELOLAbilityInputID,TSubclassOf<UGameplayAbility>> BasicAbilities;
 };

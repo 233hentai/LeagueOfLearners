@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/LOLCharacter.h"
 #include "InputActionValue.h"
+#include "GAS/LOLGameplayAbilityTypes.h"
 #include "LOLPlayerCharacter.generated.h"
 
 
@@ -26,6 +27,14 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "View", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* ViewCamera;
 
+	FVector GetLookRightDirection() const;
+	FVector GetLookForwardDirection() const;
+	FVector GetMoveForwardDirection() const;
+
+	/***************************************************************/
+	/*                           Input                             */
+	/***************************************************************/
+private:
 	UPROPERTY(EditDefaultsOnly, Category = "INPUT")
 	class UInputAction* JumpInputAction;
 
@@ -36,13 +45,14 @@ private:
 	class UInputAction* MoveInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "INPUT")
+	TMap<ELOLAbilityInputID, class UInputAction*> GameplayAbilityInputActions;
+
+	UPROPERTY(EditDefaultsOnly, Category = "INPUT")
 	class UInputMappingContext* GameplayInputMappingContext;
 	
 	void HandleLookInput(const FInputActionValue& InputActionValue);
 	void HandleMoveInput(const FInputActionValue& InputActionValue);
 
-	FVector GetLookRightDirection() const;
-	FVector GetLookForwardDirection() const;
-	FVector GetMoveForwardDirection() const;
+	void HandleAbilityInput(const FInputActionValue& InputActionValue,ELOLAbilityInputID InputID);
 
 };
