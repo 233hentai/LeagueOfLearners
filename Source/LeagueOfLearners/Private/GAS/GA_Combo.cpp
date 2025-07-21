@@ -7,6 +7,7 @@
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 #include "GameplayTagsManager.h"
 #include "GAS/LOLAbilitySystemStatics.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 UGA_Combo::UGA_Combo()
 {
@@ -32,6 +33,11 @@ void UGA_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		WaitComboChangeEventTask->EventReceived.AddDynamic(this,&UGA_Combo::ComboChangedEventReceived);
 		WaitComboChangeEventTask->ReadyForActivation();
 	}
+	if (K2_HasAuthority()) {
+		UAbilityTask_WaitGameplayEvent* WaitTargetEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this,GetComboTargetEventEndTag());
+		WaitTargetEventTask->EventReceived.AddDynamic(this, &UGA_Combo::DoDamage);
+		WaitTargetEventTask->ReadyForActivation();
+	}
 	SetupWaitComboInputPress();
 }
 
@@ -43,6 +49,11 @@ FGameplayTag UGA_Combo::GetComboChangedEventTag()
 FGameplayTag UGA_Combo::GetComboChangedEventEndTag()
 {
 	return FGameplayTag::RequestGameplayTag("Ability.Combo.Change.End");
+}
+
+FGameplayTag UGA_Combo::GetComboTargetEventEndTag()
+{
+	return FGameplayTag::RequestGameplayTag("Ability.Combo.Damage");
 }
 
 void UGA_Combo::SetupWaitComboInputPress()
@@ -68,6 +79,19 @@ void UGA_Combo::TryCommitCombo()
 	OwnerAnimInstace->Montage_SetNextSection(OwnerAnimInstace->Montage_GetCurrentSection(ComboMotage),NextComboName,ComboMotage);
 }
 
+TSubclassOf<UGameplayEffect> UGA_Combo::GetDamageEffectForCurrentCombo() const
+{
+	UAnimInstance* OwnerAnimInstance = GetOwnerAnimInstance();
+	if (OwnerAnimInstance) {
+		FName CurrentSectionName = OwnerAnimInstance->Montage_GetCurrentSection(ComboMotage);
+		const TSubclassOf<UGameplayEffect>* FoundEffectPtr = DamageEffectMap.Find(CurrentSectionName);
+		if (FoundEffectPtr) {
+			return *FoundEffectPtr;
+		}
+	}
+	return DefaultDamageEffect;
+}
+
 void UGA_Combo::ComboChangedEventReceived(FGameplayEventData Data)
 {
 	FGameplayTag EventTag = Data.EventTag;
@@ -80,4 +104,19 @@ void UGA_Combo::ComboChangedEventReceived(FGameplayEventData Data)
 	UGameplayTagsManager::Get().SplitGameplayTagFName(EventTag, TagNames);
 	NextComboName = TagNames.Last();
 	UE_LOG(LogTemp, Warning, TEXT("Next combo is %s"),*NextComboName.ToString());
+}
+
+void UGA_Combo::DoDamage(FGameplayEventData Data)
+{
+	TArray<FHitResult> HitResults = GetHitResultFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius,false,true);
+	for (const FHitResult& Result : HitResults) {
+		TSubclassOf<UGameplayEffect> Effect = GetDamageEffectForCurrentCombo();
+		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(Effect,GetAbilityLevel(GetCurrentAbilitySpecHandle(),GetCurrentActorInfo()));
+
+		FGameplayEffectContextHandle EffectContext = MakeEffectContext(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo());
+		EffectContext.AddHitResult(Result);
+		EffectSpecHandle.Data->SetContext(EffectContext);
+
+		ApplyGameplayEffectSpecToTarget(GetCurrentAbilitySpecHandle(),CurrentActorInfo,CurrentActivationInfo, EffectSpecHandle,UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Result.GetActor()));
+	}
 }
