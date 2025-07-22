@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayTagContainer.h" 
 #include "LOLCharacter.generated.h"
 
 UCLASS()
@@ -39,6 +40,8 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 private:
+	void BindGASChangeDelegates();
+	void DeathTagUpdated(const FGameplayTag Tag,int32 NewCount);
 	UPROPERTY(VisibleDefaultsOnly, Category = "UI")
 	class ULOLAbilitySystemComponent* LOLAbilitySystemComponent;
 	UPROPERTY()
@@ -58,4 +61,26 @@ private:
 	float HeadStatsGaugeVisibilityRangeSquared = 1000000.f;//距离的平方而不是距离，少一次开方运算
 	FTimerHandle OverHeadStatsGaugeVisibilityHandle;
 	void UpdateHeadStatsGaugeVisibility();
+	void SetStatusGaugeEnabled(bool bIsEnabled);
+
+/*******************************************************************/
+/*                       Death and Respawn                         */
+/*******************************************************************/
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Death")
+	UAnimMontage* DeathMontage;
+	void PlayDeathMontage();
+
+	void StartDeathSequence(); 
+	void Respawn();
+
+	virtual void OnDead();
+	virtual void OnRespawn();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Death")
+	float DeathMontageFinishTimeShift=-0.8f;
+	FTimerHandle DeathMontageTimerHandle;
+	FTransform MeshRelativeTransform;
+	void DeathMontageFinished();
+	void SetRagDollEnabled(bool bIsEnabled);
 };

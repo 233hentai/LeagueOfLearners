@@ -2,6 +2,12 @@
 
 
 #include "GAS/LOLAbilitySystemComponent.h"
+#include "GAS/LOLAttributeSet.h"
+
+ULOLAbilitySystemComponent::ULOLAbilitySystemComponent()
+{
+	GetGameplayAttributeValueChangeDelegate(ULOLAttributeSet::GetHealthAttribute()).AddUObject(this,&ULOLAbilitySystemComponent::HealthUpdated);
+}
 
 void ULOLAbilitySystemComponent::ApplyInitialEffects()
 {
@@ -24,5 +30,28 @@ void ULOLAbilitySystemComponent::GiveInitialAbilities()
 	}
 	for (const TPair<ELOLAbilityInputID, TSubclassOf<UGameplayAbility>>& AbilityPair : BasicAbilities) {
 		GiveAbility(FGameplayAbilitySpec(AbilityPair.Value, 1, (int32)AbilityPair.Key, nullptr));
+	}
+}
+
+void ULOLAbilitySystemComponent::ApplyFullStatEffect()
+{
+	AuthApplyGameplayEffect(FullStatEffect);
+}
+
+void ULOLAbilitySystemComponent::AuthApplyGameplayEffect(TSubclassOf<UGameplayEffect> Effect, int Level)
+{
+	if (GetOwner() && GetOwner()->HasAuthority()) {
+		if (Effect) {
+			FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingSpec(Effect, Level, MakeEffectContext());
+			ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+		}
+	}
+}
+
+void ULOLAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& ChangeData)
+{
+	if (!GetOwner()) return;
+	if (GetOwner()->HasAuthority() && ChangeData.NewValue <= 0 && DeathEffect) {
+		AuthApplyGameplayEffect(DeathEffect);
 	}
 }

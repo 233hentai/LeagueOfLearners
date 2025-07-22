@@ -16,4 +16,5 @@ class ULOLAbilitySystemStatics:public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 public:
 	static FGameplayTag GetBasicAttackAbilityTag();
+	static FGameplayTag GetDeadStatTag();
 };

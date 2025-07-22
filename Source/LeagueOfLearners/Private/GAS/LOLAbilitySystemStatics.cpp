@@ -8,3 +8,8 @@ FGameplayTag ULOLAbilitySystemStatics::GetBasicAttackAbilityTag()
 {
 	return FGameplayTag::RequestGameplayTag("Ability.BasicAttack");
 }
+
+FGameplayTag ULOLAbilitySystemStatics::GetDeadStatTag()
+{
+	return FGameplayTag::RequestGameplayTag("Stats.Death");
+}

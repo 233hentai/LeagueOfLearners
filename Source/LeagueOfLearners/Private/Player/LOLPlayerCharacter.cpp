@@ -78,6 +78,22 @@ void ALOLPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActio
 	}
 }
 
+void ALOLPlayerCharacter::OnDead()
+{
+	APlayerController* PlayerController = GetController<APlayerController>();
+	if (PlayerController) {
+		DisableInput(PlayerController);
+	}
+}
+
+void ALOLPlayerCharacter::OnRespawn()
+{
+	APlayerController* PlayerController = GetController<APlayerController>();
+	if (PlayerController) {
+		EnableInput(PlayerController);
+	}
+}
+
 FVector ALOLPlayerCharacter::GetLookRightDirection() const
 {
 	return ViewCamera->GetRightVector();

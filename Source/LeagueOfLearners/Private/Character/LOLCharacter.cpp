@@ -4,8 +4,11 @@
 #include "Character/LOLCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/LOLAbilitySystemComponent.h"
 #include "GAS/LOLAttributeSet.h"
+#include "GAS/LOLAbilitySystemStatics.h"
 #include "Widgets/OverHeadStatsGauge.h"
 #include "Kismet/GameplayStatics.h"
 // Sets default values
@@ -19,6 +22,8 @@ ALOLCharacter::ALOLCharacter()
 	LOLAttributeSet = CreateDefaultSubobject<ULOLAttributeSet>("LOLAttribute Set");
 	OverHeadWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("Over Head Widget Component");
 	OverHeadWidgetComponent->SetupAttachment(GetRootComponent());
+
+	BindGASChangeDelegates();
 }
 
 void ALOLCharacter::ServerSideInit()
@@ -51,7 +56,7 @@ void ALOLCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	ConfigureOverHeadStatsWidget();
-	
+	MeshRelativeTransform = GetMesh()->GetRelativeTransform();
 }
 
 // Called every frame
@@ -71,6 +76,24 @@ void ALOLCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 UAbilitySystemComponent* ALOLCharacter::GetAbilitySystemComponent() const
 {
 	return LOLAbilitySystemComponent;
+}
+
+void ALOLCharacter::BindGASChangeDelegates()
+{
+	if (LOLAbilitySystemComponent) {
+		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ALOLCharacter::DeathTagUpdated);
+	}
+}
+
+void ALOLCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+	if (NewCount != 0) {
+		StartDeathSequence();
+	}
+	else
+	{
+		Respawn();
+	}
 }
 
 void ALOLCharacter::ConfigureOverHeadStatsWidget()
@@ -98,6 +121,76 @@ void ALOLCharacter::UpdateHeadStatsGaugeVisibility()
 	if (LocalPlayerPawn) {
 		float DistanceSquared = FVector::DistSquared(GetActorLocation(), LocalPlayerPawn->GetActorLocation());
 		OverHeadWidgetComponent->SetHiddenInGame(DistanceSquared>HeadStatsGaugeVisibilityRangeSquared);
+	}
+}
+
+void ALOLCharacter::SetStatusGaugeEnabled(bool bIsEnabled)
+{
+	GetWorldTimerManager().ClearTimer(OverHeadStatsGaugeVisibilityHandle);
+	if (bIsEnabled) {
+		ConfigureOverHeadStatsWidget();
+	}
+	else {
+		OverHeadWidgetComponent->SetHiddenInGame(true);
+	}
+}
+
+void ALOLCharacter::PlayDeathMontage()
+{
+	if (DeathMontage) {
+		float MontageTime=PlayAnimMontage(DeathMontage);	
+		GetWorldTimerManager().SetTimer(DeathMontageTimerHandle,this, &ALOLCharacter::DeathMontageFinished, MontageTime+DeathMontageFinishTimeShift);
+	}
+}
+
+void ALOLCharacter::StartDeathSequence()
+{
+	OnDead();
+	PlayDeathMontage();
+	SetStatusGaugeEnabled(false);
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ALOLCharacter::Respawn()
+{
+	OnRespawn();
+	SetRagDollEnabled(false);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
+	SetStatusGaugeEnabled(true);
+
+	if (LOLAbilitySystemComponent) {
+		LOLAbilitySystemComponent->ApplyFullStatEffect();
+	}
+}
+
+void ALOLCharacter::OnDead()
+{
+}
+
+void ALOLCharacter::OnRespawn()
+{
+}
+
+void ALOLCharacter::DeathMontageFinished()
+{
+	SetRagDollEnabled(true);
+}
+
+void ALOLCharacter::SetRagDollEnabled(bool bIsEnabled)
+{
+	if (bIsEnabled) {
+		GetMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		GetMesh()->SetSimulatePhysics(true);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	}
+	else {
+		GetMesh()->SetSimulatePhysics(false);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetMesh()->AttachToComponent(GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
+		GetMesh()->SetRelativeTransform(MeshRelativeTransform);
 	}
 }
 
