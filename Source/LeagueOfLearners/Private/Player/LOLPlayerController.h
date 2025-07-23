@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "GenericTeamAgentInterface.h"
 #include "LOLPlayerController.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class ALOLPlayerController : public APlayerController
+class ALOLPlayerController : public APlayerController,public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 	
@@ -20,6 +21,14 @@ public:
 
 	//仅客户端调用
 	void AcknowledgePossession(APawn* NewPawn) override;
+
+	/** Assigns Team Agent to given TeamID */
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+
+	/** Retrieve team identifier in form of FGenericTeamId */
+	virtual FGenericTeamId GetGenericTeamId() const override;
+
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 private:
 	void SpawnGameplayWidget();
@@ -32,4 +41,7 @@ private:
 
 	UPROPERTY()
 	class UGameplayWidget* GameplayWidget;
+
+	UPROPERTY(Replicated)
+	FGenericTeamId TeamID;
 };

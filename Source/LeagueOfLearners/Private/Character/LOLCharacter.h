@@ -6,10 +6,11 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayTagContainer.h" 
+#include "GenericTeamAgentInterface.h"
 #include "LOLCharacter.generated.h"
 
 UCLASS()
-class ALOLCharacter : public ACharacter, public IAbilitySystemInterface
+class ALOLCharacter : public ACharacter, public IAbilitySystemInterface,public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -19,8 +20,9 @@ public:
 	void ServerSideInit();
 	void ClientSideInit();
 	bool IsControlledByLocalPlayer() const;
-	//仅在服务器端调用
-	virtual void PossessedBy(AController* NewController) override;
+	virtual void PossessedBy(AController* NewController) override;//仅在服务器端调用
+
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -83,4 +85,18 @@ private:
 	FTransform MeshRelativeTransform;
 	void DeathMontageFinished();
 	void SetRagDollEnabled(bool bIsEnabled);
+
+/*******************************************************************/
+/*                               Team                              */
+/*******************************************************************/
+public:
+	/** Assigns Team Agent to given TeamID */
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+
+	/** Retrieve team identifier in form of FGenericTeamId */
+	virtual FGenericTeamId GetGenericTeamId() const override;
+
+private:
+	UPROPERTY(Replicated)
+	FGenericTeamId TeamID;
 };

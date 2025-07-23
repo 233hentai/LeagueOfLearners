@@ -20,6 +20,7 @@ public:
 	ALOLPlayerCharacter();
 	virtual void PawnClientRestart() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "View", meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraArm;

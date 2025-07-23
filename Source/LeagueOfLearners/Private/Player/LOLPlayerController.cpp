@@ -4,6 +4,7 @@
 #include "Player/LOLPlayerController.h"
 #include "Player/LOLPlayerCharacter.h"
 #include "Widgets/GameplayWidget.h"
+#include "Net/UnrealNetwork.h"
 
 void ALOLPlayerController::OnPossess(APawn* NewPawn)
 {
@@ -11,6 +12,7 @@ void ALOLPlayerController::OnPossess(APawn* NewPawn)
 	LOLPlayerCharacter = Cast<ALOLPlayerCharacter>(NewPawn);
 	if (LOLPlayerCharacter) {
 		LOLPlayerCharacter->ServerSideInit();
+		LOLPlayerCharacter->SetGenericTeamId(TeamID);
 	}
 }
 
@@ -23,6 +25,22 @@ void ALOLPlayerController::AcknowledgePossession(APawn* NewPawn)
 		SpawnGameplayWidget();
 	}
 
+}
+
+void ALOLPlayerController::SetGenericTeamId(const FGenericTeamId& NewTeamID)
+{
+	TeamID = NewTeamID;
+}
+
+FGenericTeamId ALOLPlayerController::GetGenericTeamId() const
+{
+	return TeamID;
+}
+
+void ALOLPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ALOLPlayerController,TeamID);
 }
 
 void ALOLPlayerController::SpawnGameplayWidget()

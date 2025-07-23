@@ -108,7 +108,7 @@ void UGA_Combo::ComboChangedEventReceived(FGameplayEventData Data)
 
 void UGA_Combo::DoDamage(FGameplayEventData Data)
 {
-	TArray<FHitResult> HitResults = GetHitResultFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius,false,true);
+	TArray<FHitResult> HitResults = GetHitResultFromSweepLocationTargetData(Data.TargetData, TargetSweepSphereRadius);
 	for (const FHitResult& Result : HitResults) {
 		TSubclassOf<UGameplayEffect> Effect = GetDamageEffectForCurrentCombo();
 		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(Effect,GetAbilityLevel(GetCurrentAbilitySpecHandle(),GetCurrentActorInfo()));

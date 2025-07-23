@@ -11,6 +11,8 @@
 #include "GAS/LOLAbilitySystemStatics.h"
 #include "Widgets/OverHeadStatsGauge.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/Unrealnetwork.h"
+
 // Sets default values
 ALOLCharacter::ALOLCharacter()
 {
@@ -49,6 +51,12 @@ void ALOLCharacter::PossessedBy(AController* NewController)
 	if (NewController && !NewController->IsPlayerController()) {
 		ServerSideInit();
 	}
+}
+
+void ALOLCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ALOLCharacter,TeamID);
 }
 
 // Called when the game starts or when spawned
@@ -161,6 +169,13 @@ void ALOLCharacter::Respawn()
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
 	SetStatusGaugeEnabled(true);
 
+	if (HasAuthority()) {
+		TWeakObjectPtr<AActor> StartSpot = GetController()->StartSpot;
+		if (StartSpot.IsValid()) {
+			SetActorTransform(StartSpot->GetActorTransform());
+		}
+	}
+
 	if (LOLAbilitySystemComponent) {
 		LOLAbilitySystemComponent->ApplyFullStatEffect();
 	}
@@ -192,5 +207,15 @@ void ALOLCharacter::SetRagDollEnabled(bool bIsEnabled)
 		GetMesh()->AttachToComponent(GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
 		GetMesh()->SetRelativeTransform(MeshRelativeTransform);
 	}
+}
+
+void ALOLCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
+{
+	TeamID = NewTeamID;
+}
+
+FGenericTeamId ALOLCharacter::GetGenericTeamId() const
+{
+	return TeamID;
 }
 
