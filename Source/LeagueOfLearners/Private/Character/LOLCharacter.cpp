@@ -12,6 +12,8 @@
 #include "Widgets/OverHeadStatsGauge.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/Unrealnetwork.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 
 // Sets default values
 ALOLCharacter::ALOLCharacter()
@@ -26,6 +28,8 @@ ALOLCharacter::ALOLCharacter()
 	OverHeadWidgetComponent->SetupAttachment(GetRootComponent());
 
 	BindGASChangeDelegates();
+
+	PerceptionStimuliSourceComponent = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>("Perception Stimuli Source Component");
 }
 
 void ALOLCharacter::ServerSideInit()
@@ -65,6 +69,8 @@ void ALOLCharacter::BeginPlay()
 	Super::BeginPlay();
 	ConfigureOverHeadStatsWidget();
 	MeshRelativeTransform = GetMesh()->GetRelativeTransform();
+
+	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
 }
 
 // Called every frame
@@ -158,6 +164,7 @@ void ALOLCharacter::StartDeathSequence()
 	SetStatusGaugeEnabled(false);
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SetAIPerceptionStimuliSourceEnabled(false);
 }
 
 void ALOLCharacter::Respawn()
@@ -168,6 +175,7 @@ void ALOLCharacter::Respawn()
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
 	SetStatusGaugeEnabled(true);
+	SetAIPerceptionStimuliSourceEnabled(true);
 
 	if (HasAuthority()) {
 		TWeakObjectPtr<AActor> StartSpot = GetController()->StartSpot;
@@ -217,5 +225,16 @@ void ALOLCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 FGenericTeamId ALOLCharacter::GetGenericTeamId() const
 {
 	return TeamID;
+}
+
+void ALOLCharacter::SetAIPerceptionStimuliSourceEnabled(bool bIsEnabled)
+{
+	if (!PerceptionStimuliSourceComponent) return;
+	if (bIsEnabled) {
+		PerceptionStimuliSourceComponent->RegisterWithPerceptionSystem();
+	}
+	else {
+		PerceptionStimuliSourceComponent->UnregisterFromPerceptionSystem();
+	}
 }
 
