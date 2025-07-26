@@ -6,6 +6,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "GAS/LOLAbilitySystemStatics.h"
@@ -30,13 +31,18 @@ ALOLAIController::ALOLAIController()
 void ALOLAIController::OnPossess(APawn* NewPawn)
 {
 	Super::OnPossess(NewPawn);
-	SetGenericTeamId(FGenericTeamId(0));
 
 	IGenericTeamAgentInterface* PawnTeamInterface = Cast<IGenericTeamAgentInterface>(NewPawn);
 	if (PawnTeamInterface) {
-		PawnTeamInterface->SetGenericTeamId(GetGenericTeamId());
+		SetGenericTeamId(PawnTeamInterface->GetGenericTeamId());
+		ClearAndDisableAllSenses();
+		EnableAllSenses();
 	}
 
+	UAbilitySystemComponent* PawnASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(NewPawn);
+	if (PawnASC) {
+		PawnASC->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ALOLAIController::PawnDeadTagUpdated);
+	}
 }
 
 void ALOLAIController::BeginPlay()
@@ -118,5 +124,35 @@ void ALOLAIController::ForgetActorIfDead(AActor* ActorToForget)
 				Stimuli.SetStimulusAge(TNumericLimits<float>::Max());
 			}
 		}
+	}
+}
+
+void ALOLAIController::ClearAndDisableAllSenses()
+{
+	AIPerceptionComponent->AgeStimuli(TNumericLimits<float>::Max());
+	for (auto SenseConfigIterator = AIPerceptionComponent->GetSensesConfigIterator(); SenseConfigIterator; ++SenseConfigIterator) {
+		AIPerceptionComponent->SetSenseEnabled((*SenseConfigIterator)->GetSenseImplementation(),false);
+	}
+	if (GetBlackboardComponent()) {
+		GetBlackboardComponent()->ClearValue(TargetBlackboardKeyName);
+	}
+}
+
+void ALOLAIController::EnableAllSenses()
+{
+	for (auto SenseConfigIterator = AIPerceptionComponent->GetSensesConfigIterator(); SenseConfigIterator; ++SenseConfigIterator) {
+		AIPerceptionComponent->SetSenseEnabled((*SenseConfigIterator)->GetSenseImplementation(), true);
+	}
+}
+
+void ALOLAIController::PawnDeadTagUpdated(const FGameplayTag Tag, int32 Count)
+{
+	if (Count != 0) {
+		GetBrainComponent()->StopLogic("Dead");
+		ClearAndDisableAllSenses();
+	}
+	else {
+		GetBrainComponent()->StartLogic();
+		EnableAllSenses();
 	}
 }

@@ -159,6 +159,10 @@ void ALOLCharacter::PlayDeathMontage()
 
 void ALOLCharacter::StartDeathSequence()
 {
+	if (LOLAbilitySystemComponent) {
+		LOLAbilitySystemComponent->CancelAbilities();
+	}
+
 	OnDead();
 	PlayDeathMontage();
 	SetStatusGaugeEnabled(false);
@@ -225,6 +229,10 @@ void ALOLCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 FGenericTeamId ALOLCharacter::GetGenericTeamId() const
 {
 	return TeamID;
+}
+
+void ALOLCharacter::OnRep_TeamID()
+{
 }
 
 void ALOLCharacter::SetAIPerceptionStimuliSourceEnabled(bool bIsEnabled)
