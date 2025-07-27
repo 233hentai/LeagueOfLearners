@@ -149,6 +149,18 @@ void ALOLCharacter::SetStatusGaugeEnabled(bool bIsEnabled)
 	}
 }
 
+bool ALOLCharacter::IsDead() const
+{
+	return GetAbilitySystemComponent()->HasMatchingGameplayTag(ULOLAbilitySystemStatics::GetDeadStatTag());
+}
+
+void ALOLCharacter::RespawnImmediately()
+{
+	if (HasAuthority()) {
+		GetAbilitySystemComponent()->RemoveActiveEffectsWithGrantedTags(FGameplayTagContainer(ULOLAbilitySystemStatics::GetDeadStatTag()));
+	}
+}
+
 void ALOLCharacter::PlayDeathMontage()
 {
 	if (DeathMontage) {
@@ -203,7 +215,9 @@ void ALOLCharacter::OnRespawn()
 
 void ALOLCharacter::DeathMontageFinished()
 {
-	SetRagDollEnabled(true);
+	if (IsDead()) {
+		SetRagDollEnabled(true);
+	}
 }
 
 void ALOLCharacter::SetRagDollEnabled(bool bIsEnabled)

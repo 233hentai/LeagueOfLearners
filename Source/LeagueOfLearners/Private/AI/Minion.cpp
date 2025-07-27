@@ -2,8 +2,8 @@
 
 
 #include "AI/Minion.h"
-#include "AbilitySystemComponent.h"
-#include "GAS/LOLAbilitySystemStatics.h"
+#include "AIController.h"
+#include "BehaviorTree/BlackBoardComponent.h"
 
 void AMinion::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 {
@@ -13,11 +13,20 @@ void AMinion::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 
 bool AMinion::isActive() const
 {
-	return !GetAbilitySystemComponent()->HasMatchingGameplayTag(ULOLAbilitySystemStatics::GetDeadStatTag());
+	return !IsDead();
 }
 
 void AMinion::Activate() {
-	GetAbilitySystemComponent()->RemoveActiveEffectsWithGrantedTags(FGameplayTagContainer(ULOLAbilitySystemStatics::GetDeadStatTag()));
+	RespawnImmediately();
+}
+
+void AMinion::SetGoal(AActor* Goal)
+{
+	if (AAIController* AIController = GetController<AAIController>()) {
+		if (UBlackboardComponent* BlckBoard = AIController->GetBlackboardComponent()) {
+			BlckBoard->SetValueAsObject(GoalBlackboardKeyName,Goal);
+		}
+	}
 }
 
 void AMinion::PickSkinBasedOnTeamID()

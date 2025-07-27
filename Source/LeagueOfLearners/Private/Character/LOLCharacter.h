@@ -68,6 +68,9 @@ private:
 /*******************************************************************/
 /*                       Death and Respawn                         */
 /*******************************************************************/
+public:
+	bool IsDead() const;
+	void RespawnImmediately();
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Death")
 	UAnimMontage* DeathMontage;

@@ -9,6 +9,10 @@ void UValueGauge::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 	ProgressBar->SetFillColorAndOpacity(BarColor);
+
+	ValueText->SetFont(ValueTextFont);
+	ValueText->SetVisibility(bValueTextVisible?ESlateVisibility::Visible:ESlateVisibility::Hidden);
+	ProgressBar->SetVisibility(bProgressBarVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 }
 void UValueGauge::SetValue(float NewValue, float NewMaxValue) {
 	CachedValue = NewValue;

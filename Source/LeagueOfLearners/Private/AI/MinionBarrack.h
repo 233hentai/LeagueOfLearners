@@ -38,6 +38,8 @@ private:
 	int SpawnAmount = 5;
 	UPROPERTY(EditAnywhere, Category = "Spawn")
 	float GroupSpawnInterval=10.f;
+	UPROPERTY(EditAnywhere, Category = "Spawn")
+	AActor* Goal;
 
 	int NextSpawnSpotIndex = -1;
 	const APlayerStart* GetNextSpawnSpot();
