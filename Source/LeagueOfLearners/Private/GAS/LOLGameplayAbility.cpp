@@ -4,6 +4,9 @@
 #include "GAS/LOLGameplayAbility.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "GameFramework/Character.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GAS/GAP_Launched.h"
 
 UAnimInstance* ULOLGameplayAbility::GetOwnerAnimInstance() const
 {
@@ -52,4 +55,32 @@ TArray<FHitResult> ULOLGameplayAbility::GetHitResultFromSweepLocationTargetData(
     }
     
     return OutResults;
+}
+
+void ULOLGameplayAbility::PushSelf(const FVector& PushVelocity)
+{
+    ACharacter* OwningAvatarCharacter = GetOwningAvatarActor();
+    if (OwningAvatarCharacter) {
+        OwningAvatarCharacter->LaunchCharacter(PushVelocity,true,true);
+    }
+}
+
+void ULOLGameplayAbility::PushTarget(AActor* Target, const FVector& PushVelocity)
+{
+    if (!Target) return;
+    FGameplayEventData EventData;
+    FGameplayAbilityTargetData_SingleTargetHit* HitData = new FGameplayAbilityTargetData_SingleTargetHit;
+    FHitResult HitResult;
+    HitResult.ImpactNormal = PushVelocity;
+    HitData->HitResult = HitResult;
+    EventData.TargetData.Add(HitData);
+    UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Target,UGAP_Launched::GetLaunchedAbilityActivationTag(), EventData);
+}
+
+ACharacter* ULOLGameplayAbility::GetOwningAvatarActor()
+{
+    if (!AvatarCharacter) {
+        AvatarCharacter = Cast<ACharacter>(GetAvatarActorFromActorInfo());
+    }
+    return AvatarCharacter;
 }

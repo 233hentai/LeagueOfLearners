@@ -97,13 +97,13 @@ void UGA_Combo::ComboChangedEventReceived(FGameplayEventData Data)
 	FGameplayTag EventTag = Data.EventTag;
 	if (EventTag == GetComboChangedEventEndTag()) {
 		NextComboName = NAME_None;
-		UE_LOG(LogTemp, Warning, TEXT("Next combo is cleared"));
+		//UE_LOG(LogTemp, Warning, TEXT("Next combo is cleared"));
 		return;
 	}
 	TArray<FName> TagNames;
 	UGameplayTagsManager::Get().SplitGameplayTagFName(EventTag, TagNames);
 	NextComboName = TagNames.Last();
-	UE_LOG(LogTemp, Warning, TEXT("Next combo is %s"),*NextComboName.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("Next combo is %s"),*NextComboName.ToString());
 }
 
 void UGA_Combo::DoDamage(FGameplayEventData Data)
