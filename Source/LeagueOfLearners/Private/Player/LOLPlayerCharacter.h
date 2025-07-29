@@ -55,6 +55,7 @@ private:
 	void HandleMoveInput(const FInputActionValue& InputActionValue);
 
 	void HandleAbilityInput(const FInputActionValue& InputActionValue,ELOLAbilityInputID InputID);
+	void SetInputEnabledFromPlayerController(bool bEnabled);
 
 /*******************************************************************/
 /*                       Death and Respawn                         */
@@ -62,5 +63,12 @@ private:
 private:
 	virtual void OnDead() override;
 	virtual void OnRespawn() override;
+
+/*******************************************************************/
+/*                              Stun                               */
+/*******************************************************************/
+private:
+	virtual void OnStun() override;
+	virtual void OnRecoverFromStun() override;
 
 };

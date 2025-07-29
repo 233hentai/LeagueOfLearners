@@ -13,3 +13,8 @@ FGameplayTag ULOLAbilitySystemStatics::GetDeadStatTag()
 {
 	return FGameplayTag::RequestGameplayTag("Stats.Death");
 }
+
+FGameplayTag ULOLAbilitySystemStatics::GetStunStatTag()
+{
+	return FGameplayTag::RequestGameplayTag("Stats.Stun");
+}

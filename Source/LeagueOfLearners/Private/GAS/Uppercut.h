@@ -24,10 +24,16 @@ private:
 	float SweepSphereRadius = 80.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Launch")
 	float UppercutLaunchSpeed = 1000.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Launch")
+	TSubclassOf<UGameplayEffect> LaunchDamageEffect;
 
 	static FGameplayTag GetUppercutLaunchTag();
 
 	UFUNCTION()
 	void StartLaunching(FGameplayEventData EventData);
+
+	UFUNCTION()
+	void HandleComboChangeEvent(FGameplayEventData EventData);
+	FName NextComboName;
 
 };

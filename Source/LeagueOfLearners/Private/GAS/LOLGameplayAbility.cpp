@@ -7,6 +7,12 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GAS/GAP_Launched.h"
+#include "GAS/LOLAbilitySystemStatics.h"
+
+ULOLGameplayAbility::ULOLGameplayAbility()
+{
+    ActivationBlockedTags.AddTag(ULOLAbilitySystemStatics::GetStunStatTag());
+}
 
 UAnimInstance* ULOLGameplayAbility::GetOwnerAnimInstance() const
 {
@@ -83,4 +89,15 @@ ACharacter* ULOLGameplayAbility::GetOwningAvatarActor()
         AvatarCharacter = Cast<ACharacter>(GetAvatarActorFromActorInfo());
     }
     return AvatarCharacter;
+}
+
+void ULOLGameplayAbility::ApplyGameplayEffectToHitResultActor(const FHitResult& HitResult, TSubclassOf<UGameplayEffect> GameplayEffect, int level)
+{
+    FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(GameplayEffect, level);
+
+    FGameplayEffectContextHandle EffectContext = MakeEffectContext(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo());
+    EffectContext.AddHitResult(HitResult);
+    EffectSpecHandle.Data->SetContext(EffectContext);
+
+    ApplyGameplayEffectSpecToTarget(GetCurrentAbilitySpecHandle(), CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(HitResult.GetActor()));
 }

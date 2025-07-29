@@ -44,6 +44,7 @@ public:
 private:
 	void BindGASChangeDelegates();
 	void DeathTagUpdated(const FGameplayTag Tag,int32 NewCount);
+	void StunTagUpdated(const FGameplayTag Tag, int32 NewCount);
 	UPROPERTY(VisibleDefaultsOnly, Category = "UI")
 	class ULOLAbilitySystemComponent* LOLAbilitySystemComponent;
 	UPROPERTY()
@@ -88,6 +89,15 @@ private:
 	FTransform MeshRelativeTransform;
 	void DeathMontageFinished();
 	void SetRagDollEnabled(bool bIsEnabled);
+
+/*******************************************************************/
+/*                               Stun                              */
+/*******************************************************************/
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Stun")
+	UAnimMontage* StunMontage;
+	virtual void OnStun();
+	virtual void OnRecoverFromStun();
 
 /*******************************************************************/
 /*                               Team                              */

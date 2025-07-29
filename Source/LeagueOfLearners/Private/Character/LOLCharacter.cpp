@@ -96,6 +96,7 @@ void ALOLCharacter::BindGASChangeDelegates()
 {
 	if (LOLAbilitySystemComponent) {
 		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ALOLCharacter::DeathTagUpdated);
+		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetStunStatTag()).AddUObject(this, &ALOLCharacter::StunTagUpdated);
 	}
 }
 
@@ -107,6 +108,19 @@ void ALOLCharacter::DeathTagUpdated(const FGameplayTag Tag, int32 NewCount)
 	else
 	{
 		Respawn();
+	}
+}
+
+void ALOLCharacter::StunTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+	if (IsDead()) return;
+	if (NewCount != 0) {
+		OnStun();
+		PlayAnimMontage(StunMontage);
+	}
+	else {
+		OnRecoverFromStun();
+		StopAnimMontage(StunMontage);
 	}
 }
 
@@ -233,6 +247,14 @@ void ALOLCharacter::SetRagDollEnabled(bool bIsEnabled)
 		GetMesh()->AttachToComponent(GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
 		GetMesh()->SetRelativeTransform(MeshRelativeTransform);
 	}
+}
+
+void ALOLCharacter::OnStun()
+{
+}
+
+void ALOLCharacter::OnRecoverFromStun()
+{
 }
 
 void ALOLCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)

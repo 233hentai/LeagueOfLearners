@@ -79,20 +79,38 @@ void ALOLPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActio
 	}
 }
 
-void ALOLPlayerCharacter::OnDead()
+void ALOLPlayerCharacter::SetInputEnabledFromPlayerController(bool bEnabled)
 {
 	APlayerController* PlayerController = GetController<APlayerController>();
-	if (PlayerController) {
+	if (!PlayerController) return;
+	if(bEnabled)
+	{
+		EnableInput(PlayerController);
+	}
+	else {
 		DisableInput(PlayerController);
 	}
 }
 
+void ALOLPlayerCharacter::OnDead()
+{
+	SetInputEnabledFromPlayerController(false);
+}
+
 void ALOLPlayerCharacter::OnRespawn()
 {
-	APlayerController* PlayerController = GetController<APlayerController>();
-	if (PlayerController) {
-		EnableInput(PlayerController);
-	}
+	SetInputEnabledFromPlayerController(true);
+}
+
+void ALOLPlayerCharacter::OnStun()
+{
+	SetInputEnabledFromPlayerController(false);
+}
+
+void ALOLPlayerCharacter::OnRecoverFromStun()
+{
+	if (IsDead()) return;
+	SetInputEnabledFromPlayerController(true);
 }
 
 FVector ALOLPlayerCharacter::GetLookRightDirection() const

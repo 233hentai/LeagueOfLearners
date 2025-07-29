@@ -42,6 +42,7 @@ void ALOLAIController::OnPossess(APawn* NewPawn)
 	UAbilitySystemComponent* PawnASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(NewPawn);
 	if (PawnASC) {
 		PawnASC->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ALOLAIController::PawnDeadTagUpdated);
+		PawnASC->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetStunStatTag()).AddUObject(this, &ALOLAIController::PawnStunTagUpdated);
 	}
 }
 
@@ -150,9 +151,22 @@ void ALOLAIController::PawnDeadTagUpdated(const FGameplayTag Tag, int32 Count)
 	if (Count != 0) {
 		GetBrainComponent()->StopLogic("Dead");
 		ClearAndDisableAllSenses();
+		bIsPawnDead = true;
 	}
 	else {
 		GetBrainComponent()->StartLogic();
 		EnableAllSenses();
+		bIsPawnDead = false;
+	}
+}
+
+void ALOLAIController::PawnStunTagUpdated(const FGameplayTag Tag, int32 Count)
+{
+	if (bIsPawnDead) return;
+	if (Count != 0) {
+		GetBrainComponent()->StopLogic("Stun");
+	}
+	else {
+		GetBrainComponent()->StartLogic();
 	}
 }
