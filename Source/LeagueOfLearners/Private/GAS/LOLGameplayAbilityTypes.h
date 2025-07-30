@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayEffect.h"
 #include "LOLGameplayAbilityTypes.generated.h"
 
 UENUM(BlueprintType)
@@ -19,3 +20,15 @@ enum class ELOLAbilityInputID :uint8
 	Confirm						UMETA(DisplayName = "Confirm"),
 	Cancel						UMETA(DisplayName = "Cancel")
 };
+
+USTRUCT(BlueprintType)
+struct FGenericDamageEffectDef {
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UGameplayEffect> DamageEffect;
+
+	UPROPERTY(EditAnywhere)
+	FVector PushVelocity;
+}; 

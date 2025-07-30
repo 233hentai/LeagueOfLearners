@@ -9,6 +9,8 @@
 #include "EnhancedInputComponent.h"
 #include "AbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GAS/LOLAbilitySystemStatics.h"
 
 ALOLPlayerCharacter::ALOLPlayerCharacter()
 {
@@ -76,6 +78,11 @@ void ALOLPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActio
 	}
 	else {
 		GetAbilitySystemComponent()->AbilityLocalInputReleased((int32)InputID);
+	}
+
+	if (InputID == ELOLAbilityInputID::BasicAttack) {
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,ULOLAbilitySystemStatics::GetBasicAttackInputPressedTag(), FGameplayEventData());
+		Server_SendGameplayEventsToSelf(ULOLAbilitySystemStatics::GetBasicAttackInputPressedTag(), FGameplayEventData());
 	}
 }
 

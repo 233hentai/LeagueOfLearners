@@ -18,3 +18,8 @@ FGameplayTag ULOLAbilitySystemStatics::GetStunStatTag()
 {
 	return FGameplayTag::RequestGameplayTag("Stats.Stun");
 }
+
+FGameplayTag ULOLAbilitySystemStatics::GetBasicAttackInputPressedTag()
+{
+	return FGameplayTag::RequestGameplayTag("Ability.BasicAttack.Pressed");
+}

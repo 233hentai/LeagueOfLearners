@@ -14,6 +14,7 @@
 #include "Net/Unrealnetwork.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 // Sets default values
 ALOLCharacter::ALOLCharacter()
@@ -91,6 +92,17 @@ UAbilitySystemComponent* ALOLCharacter::GetAbilitySystemComponent() const
 {
 	return LOLAbilitySystemComponent;
 }
+
+bool ALOLCharacter::Server_SendGameplayEventsToSelf_Validate(const FGameplayTag& EventTag, const FGameplayEventData& EventData)
+{
+	return true;
+}
+
+void ALOLCharacter::Server_SendGameplayEventsToSelf_Implementation(const FGameplayTag& EventTag, const FGameplayEventData& EventData)
+{
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, EventTag, EventData);
+}
+
 
 void ALOLCharacter::BindGASChangeDelegates()
 {
@@ -192,7 +204,7 @@ void ALOLCharacter::StartDeathSequence()
 	OnDead();
 	PlayDeathMontage();
 	SetStatusGaugeEnabled(false);
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	//GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetAIPerceptionStimuliSourceEnabled(false);
 }
@@ -202,7 +214,7 @@ void ALOLCharacter::Respawn()
 	OnRespawn();
 	SetRagDollEnabled(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	//GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
 	SetStatusGaugeEnabled(true);
 	SetAIPerceptionStimuliSourceEnabled(true);
