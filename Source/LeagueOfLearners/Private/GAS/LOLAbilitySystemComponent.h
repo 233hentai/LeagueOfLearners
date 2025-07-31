@@ -21,6 +21,7 @@ public:
 	void ApplyInitialEffects();
 	void GiveInitialAbilities();
 	void ApplyFullStatEffect();
+	const TMap<ELOLAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const;
 
 private:
 	void AuthApplyGameplayEffect(TSubclassOf<UGameplayEffect> Effect,int Level=1);

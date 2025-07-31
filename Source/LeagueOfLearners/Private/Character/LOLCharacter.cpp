@@ -64,6 +64,11 @@ void ALOLCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(ALOLCharacter,TeamID);
 }
 
+const TMap<ELOLAbilityInputID, TSubclassOf<UGameplayAbility>>& ALOLCharacter::GetAbilities() const 
+{
+	return LOLAbilitySystemComponent->GetAbilities();
+}
+
 // Called when the game starts or when spawned
 void ALOLCharacter::BeginPlay()
 {

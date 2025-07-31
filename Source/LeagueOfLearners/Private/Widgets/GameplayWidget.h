@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "GAS/LOLGameplayAbilityTypes.h"
 #include "GameplayWidget.generated.h"
 
 /**
@@ -16,12 +17,16 @@ class UGameplayWidget : public UUserWidget
 
 public:
 	virtual void NativeConstruct() override;
+	void ConfigureAbilities(const TMap<ELOLAbilityInputID, TSubclassOf<class UGameplayAbility>>& Abilities);
 private:
 	UPROPERTY(meta = (BindWidget))
 	class UValueGauge* HealthBar;
 
 	UPROPERTY(meta = (BindWidget))
 	class UValueGauge* ManaBar;
+
+	UPROPERTY(meta = (BindWidget))
+	class UAbilityListView* AbilityListView;
 
 	UPROPERTY()
 	class UAbilitySystemComponent* OwnerAbilitySystemComponent;

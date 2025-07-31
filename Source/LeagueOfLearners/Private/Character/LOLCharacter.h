@@ -7,6 +7,8 @@
 #include "AbilitySystemInterface.h"
 #include "GameplayTagContainer.h" 
 #include "GenericTeamAgentInterface.h"
+#include "Abilities/GameplayAbility.h"        
+#include "GAS/LOLGameplayAbilityTypes.h"
 #include "LOLCharacter.generated.h"
 
 UCLASS()
@@ -23,6 +25,8 @@ public:
 	virtual void PossessedBy(AController* NewController) override;//仅在服务器端调用
 
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+
+	const TMap<ELOLAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const;
 
 protected:
 	// Called when the game starts or when spawned

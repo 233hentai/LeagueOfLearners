@@ -38,6 +38,12 @@ void ULOLAbilitySystemComponent::ApplyFullStatEffect()
 	AuthApplyGameplayEffect(FullStatEffect);
 }
 
+
+const TMap<ELOLAbilityInputID, TSubclassOf<UGameplayAbility>>& ULOLAbilitySystemComponent::GetAbilities() const
+{
+	return Abilities;
+}
+
 void ULOLAbilitySystemComponent::AuthApplyGameplayEffect(TSubclassOf<UGameplayEffect> Effect, int Level)
 {
 	if (GetOwner() && GetOwner()->HasAuthority()) {

@@ -49,5 +49,6 @@ void ALOLPlayerController::SpawnGameplayWidget()
 	GameplayWidget = CreateWidget<UGameplayWidget>(this,GameplayWidgetClass);
 	if (GameplayWidget) {
 		GameplayWidget->AddToViewport();
+		GameplayWidget->ConfigureAbilities(LOLPlayerCharacter->GetAbilities());
 	}
 }
