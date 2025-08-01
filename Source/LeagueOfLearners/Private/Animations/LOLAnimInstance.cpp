@@ -5,6 +5,9 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
+#include "GAS/LOLAbilitySystemStatics.h"
 
 void ULOLAnimInstance::NativeInitializeAnimation()
 {
@@ -12,12 +15,18 @@ void ULOLAnimInstance::NativeInitializeAnimation()
 	if (OwnerCharacter) {
 		OwnerMovementComponent = OwnerCharacter->GetCharacterMovement();
 	}
+
+	UAbilitySystemComponent* OwnerASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TryGetPawnOwner());
+	if (OwnerASC) {
+		OwnerASC->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ULOLAnimInstance::OwnerAimTagChanged);
+	}
 }
 
 void ULOLAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	if (OwnerCharacter) {
-		Speed = OwnerCharacter->GetVelocity().Length();
+		FVector Velocity = OwnerCharacter->GetVelocity();
+		Speed = Velocity.Length();
 		FRotator BodyRotation = OwnerCharacter->GetActorRotation();
 		FRotator BodyRotationDelta = UKismetMathLibrary::NormalizedDeltaRotator(BodyRotation,BodyRotationPrevious);
 		BodyRotationPrevious = BodyRotation;
@@ -26,6 +35,9 @@ void ULOLAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 		FRotator ControlRotation = OwnerCharacter->GetBaseAimRotation();
 		LookRotationOffset = UKismetMathLibrary::NormalizedDeltaRotator(ControlRotation,BodyRotation);
+
+		ForwardSpeed = Velocity.Dot(ControlRotation.Vector());
+		RightSpeed= -Velocity.Dot(ControlRotation.Vector().Cross(FVector::UpVector));
 	}
 	if (OwnerMovementComponent) {
 		bIsJumping = OwnerMovementComponent->IsFalling();
@@ -34,4 +46,14 @@ void ULOLAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 void ULOLAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 {
+}
+
+bool ULOLAnimInstance::ShouldDoFullBody() const
+{
+	return (GetSpeed() <= 0) && !(IsAiming());
+}
+
+void ULOLAnimInstance::OwnerAimTagChanged(FGameplayTag Tag, int32 NewCount)
+{
+	bIsAiming = NewCount != 0;
 }

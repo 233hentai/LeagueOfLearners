@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "GameplayTagContainer.h"
 #include "LOLAnimInstance.generated.h"
 
 /**
@@ -40,6 +41,20 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (BlueprintThreadSafe))
 	FORCEINLINE float GetLookPitchOffset() const { return LookRotationOffset.Pitch; }
 
+	UFUNCTION(BlueprintCallable, meta = (BlueprintThreadSafe))
+	FORCEINLINE bool IsAiming() const { return bIsAiming; }
+
+	UFUNCTION(BlueprintCallable, meta = (BlueprintThreadSafe))
+	FORCEINLINE float GetForwardSpeed() const { return ForwardSpeed; }
+
+	UFUNCTION(BlueprintCallable, meta = (BlueprintThreadSafe))
+	FORCEINLINE float GetRightSpeed() const { return RightSpeed; }
+
+	UFUNCTION(BlueprintCallable, meta = (BlueprintThreadSafe))
+	bool ShouldDoFullBody() const;
+
+	void OwnerAimTagChanged(FGameplayTag Tag,int32 NewCount);
+
 private:
 	UPROPERTY()
 	class ACharacter* OwnerCharacter;
@@ -56,4 +71,9 @@ private:
 
 	FRotator BodyRotationPrevious;
 	FRotator LookRotationOffset;
+
+	bool bIsAiming;
+	float ForwardSpeed;
+	float RightSpeed;
+
 };

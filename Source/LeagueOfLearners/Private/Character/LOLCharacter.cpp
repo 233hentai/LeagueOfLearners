@@ -114,6 +114,7 @@ void ALOLCharacter::BindGASChangeDelegates()
 	if (LOLAbilitySystemComponent) {
 		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ALOLCharacter::DeathTagUpdated);
 		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetStunStatTag()).AddUObject(this, &ALOLCharacter::StunTagUpdated);
+		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetAimStatTag()).AddUObject(this, &ALOLCharacter::AimTagUpdated);
 	}
 }
 
@@ -139,6 +140,17 @@ void ALOLCharacter::StunTagUpdated(const FGameplayTag Tag, int32 NewCount)
 		OnRecoverFromStun();
 		StopAnimMontage(StunMontage);
 	}
+}
+
+void ALOLCharacter::AimTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+	SetIsAiming(NewCount!=0);
+}
+
+void ALOLCharacter::SetIsAiming(bool bIsAiming)
+{
+	bUseControllerRotationYaw = bIsAiming;
+	GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
 }
 
 void ALOLCharacter::ConfigureOverHeadStatsWidget()

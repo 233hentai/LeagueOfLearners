@@ -52,6 +52,8 @@ private:
 	void BindGASChangeDelegates();
 	void DeathTagUpdated(const FGameplayTag Tag,int32 NewCount);
 	void StunTagUpdated(const FGameplayTag Tag, int32 NewCount);
+	void AimTagUpdated(const FGameplayTag Tag, int32 NewCount);
+	void SetIsAiming(bool bIsAiming);
 	UPROPERTY(VisibleDefaultsOnly, Category = "UI")
 	class ULOLAbilitySystemComponent* LOLAbilitySystemComponent;
 	UPROPERTY()
