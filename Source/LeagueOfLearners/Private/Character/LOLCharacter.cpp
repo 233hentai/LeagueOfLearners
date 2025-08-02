@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "LeagueOfLearners/LeagueOfLearners.h"
 #include "Character/LOLCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
@@ -22,6 +23,8 @@ ALOLCharacter::ALOLCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_SpringArm,ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Target, ECR_Ignore);
 
 	LOLAbilitySystemComponent = CreateDefaultSubobject<ULOLAbilitySystemComponent>("LOLAbility System Component");
 	LOLAttributeSet = CreateDefaultSubobject<ULOLAttributeSet>("LOLAttribute Set");
@@ -151,6 +154,12 @@ void ALOLCharacter::SetIsAiming(bool bIsAiming)
 {
 	bUseControllerRotationYaw = bIsAiming;
 	GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
+	OnAimStateChanged(bIsAiming);
+}
+
+void ALOLCharacter::OnAimStateChanged(bool bIsAiming)
+{
+
 }
 
 void ALOLCharacter::ConfigureOverHeadStatsWidget()

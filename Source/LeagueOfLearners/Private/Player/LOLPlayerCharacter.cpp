@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "LeagueOfLearners/LeagueOfLearners.h"
 #include "Player/LOLPlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -17,6 +18,7 @@ ALOLPlayerCharacter::ALOLPlayerCharacter()
 	CameraArm = CreateDefaultSubobject<USpringArmComponent>("CameraArm");
 	CameraArm->SetupAttachment(GetRootComponent());
 	CameraArm->bUsePawnControlRotation = true;
+	CameraArm->ProbeChannel=ECC_SpringArm;
 
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>("ViewCamera");
 	ViewCamera->SetupAttachment(CameraArm,USpringArmComponent::SocketName);
@@ -118,6 +120,30 @@ void ALOLPlayerCharacter::OnRecoverFromStun()
 {
 	if (IsDead()) return;
 	SetInputEnabledFromPlayerController(true);
+}
+
+void ALOLPlayerCharacter::OnAimStateChanged(bool bIsAiming)
+{
+	LerpCameraToLocalOffsetLocation(bIsAiming ? CameraAimLocalOffset : FVector{0.f});
+}
+
+void ALOLPlayerCharacter::LerpCameraToLocalOffsetLocation(const FVector& Goal)
+{
+	GetWorldTimerManager().ClearTimer(CameraLerpTimerHandle);
+	GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ALOLPlayerCharacter::TickCameraLocalOffsetLerp,Goal));
+}
+
+void ALOLPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
+{
+	FVector CurrentLocalOffset = ViewCamera->GetRelativeLocation();
+	if (FVector::Dist(CurrentLocalOffset, Goal) < 1.f) {
+		ViewCamera->SetRelativeLocation(Goal);
+		return;
+	}
+	float LerpAlpha = FMath::Clamp(GetWorld()->GetDeltaSeconds()*CameraLerpSpeed,0.f,1.f);
+	FVector NewLocalOffset = FMath::Lerp(CurrentLocalOffset, Goal, LerpAlpha);
+	ViewCamera->SetRelativeLocation(NewLocalOffset);
+	GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this, &ALOLPlayerCharacter::TickCameraLocalOffsetLerp, Goal));
 }
 
 FVector ALOLPlayerCharacter::GetLookRightDirection() const

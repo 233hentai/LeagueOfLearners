@@ -7,6 +7,8 @@
 ULOLAbilitySystemComponent::ULOLAbilitySystemComponent()
 {
 	GetGameplayAttributeValueChangeDelegate(ULOLAttributeSet::GetHealthAttribute()).AddUObject(this,&ULOLAbilitySystemComponent::HealthUpdated);
+	GenericConfirmInputID = (int32)ELOLAbilityInputID::Confirm;
+	GenericCancelInputID = (int32)ELOLAbilityInputID::Cancel;
 }
 
 void ULOLAbilitySystemComponent::ApplyInitialEffects()
