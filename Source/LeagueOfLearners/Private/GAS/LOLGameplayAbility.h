@@ -26,6 +26,8 @@ protected:
 
 	void PushSelf(const FVector& PushVelocity);
 	void PushTarget(AActor* Target,const FVector& PushVelocity);
+	void PushTargets(const TArray<AActor*>& Targets, const FVector& PushVelocity);
+	void PushTargets(const FGameplayAbilityTargetDataHandle& TargetDataHandle, const FVector& PushVelocity);
 	ACharacter* GetOwningAvatarActor();
 
 	void ApplyGameplayEffectToHitResultActor(const FHitResult& HitResult,TSubclassOf<UGameplayEffect> GameplayEffect,int level=1);

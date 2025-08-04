@@ -30,6 +30,11 @@ FGameplayTag ULOLAbilitySystemStatics::GetAimStatTag()
 	return FGameplayTag::RequestGameplayTag("Stats.Aim");
 }
 
+FGameplayTag ULOLAbilitySystemStatics::GetCameraShakeCueTag()
+{
+	return FGameplayTag::RequestGameplayTag("GameplayCue.CameraShake");
+}
+
 float ULOLAbilitySystemStatics::GetStaticCooldownDurationForAbility(const UGameplayAbility* Ability)
 {
 	if(!Ability) return 0.0f;

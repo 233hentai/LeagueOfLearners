@@ -39,6 +39,11 @@ void ATargetActor_GroundPick::ConfirmTargetingAndContinue()
 		TargetActors.Add(OverlapResult.GetActor());
 	}
 	FGameplayAbilityTargetDataHandle TargetData = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActorArray(TargetActors.Array(),false);
+	
+	FGameplayAbilityTargetData_SingleTargetHit* HitLocation = new FGameplayAbilityTargetData_SingleTargetHit;
+	HitLocation->HitResult.ImpactPoint = GetActorLocation();
+	TargetData.Add(HitLocation);
+
 	TargetDataReadyDelegate.Broadcast(TargetData);
 }
 
@@ -74,5 +79,8 @@ FVector ATargetActor_GroundPick::GetTargetPoint() const
 		return GetActorLocation();
 	}
 
+	if (bShouldDrawDebug) {
+		DrawDebugSphere(GetWorld(), TraceResult.ImpactPoint, TargetAreaRadius, 32, FColor::Red);
+	}
 	return TraceResult.ImpactPoint;
 }

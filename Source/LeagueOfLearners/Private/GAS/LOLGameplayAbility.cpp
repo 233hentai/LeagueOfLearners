@@ -83,6 +83,19 @@ void ULOLGameplayAbility::PushTarget(AActor* Target, const FVector& PushVelocity
     UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Target,UGAP_Launched::GetLaunchedAbilityActivationTag(), EventData);
 }
 
+void ULOLGameplayAbility::PushTargets(const TArray<AActor*>& Targets, const FVector& PushVelocity)
+{
+    for (AActor* Target : Targets) {
+        PushTarget(Target, PushVelocity);
+    }
+}
+
+void ULOLGameplayAbility::PushTargets(const FGameplayAbilityTargetDataHandle& TargetDataHandle, const FVector& PushVelocity)
+{
+    TArray<AActor*> Targets = UAbilitySystemBlueprintLibrary::GetAllActorsFromTargetData(TargetDataHandle);
+    PushTargets(Targets,PushVelocity);
+}
+
 ACharacter* ULOLGameplayAbility::GetOwningAvatarActor()
 {
     if (!AvatarCharacter) {

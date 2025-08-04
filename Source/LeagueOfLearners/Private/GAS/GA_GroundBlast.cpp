@@ -8,6 +8,7 @@
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Abilities/Tasks/AbilityTask_WaitTargetData.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
 
 UGA_GroundBlast::UGA_GroundBlast()
 {
@@ -33,15 +34,31 @@ void UGA_GroundBlast::ActivateAbility(const FGameplayAbilitySpecHandle Handle, c
 
 	AGameplayAbilityTargetActor* TargetActor;
 	WaitTargetData->BeginSpawningActor(this,TargetActorClass,TargetActor);
+	ATargetActor_GroundPick* GroundPickActor = Cast<ATargetActor_GroundPick>(TargetActor);
+	if (GroundPickActor) {
+		GroundPickActor->SetTargetAreaRadius(TargetAreaRadius);
+		GroundPickActor->SetTargetTraceRange(TargetTraceRange);
+		GroundPickActor->SetShouldDrawDebug(ShouldDrawDebug());
+	}
+
 	WaitTargetData->FinishSpawningActor(this,TargetActor);
 }
 
 void UGA_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
-	TArray<AActor*> TargetActors = UAbilitySystemBlueprintLibrary::GetAllActorsFromTargetData(TargetDataHandle);
+	/*TArray<AActor*> TargetActors = UAbilitySystemBlueprintLibrary::GetAllActorsFromTargetData(TargetDataHandle);
 	for (AActor* Actor : TargetActors) {
 		UE_LOG(LogTemp, Warning, TEXT("Target confirmed:%s"),*Actor->GetName());
-	}
+	}*/
+	BP_ApplyGameplayEffectToTarget(TargetDataHandle,DamageEffectDef.DamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
+	PushTargets(TargetDataHandle, DamageEffectDef.PushVelocity);
+
+	FGameplayCueParameters BlastCueParams;
+	BlastCueParams.Location = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle,1).ImpactPoint;
+	BlastCueParams.RawMagnitude = TargetAreaRadius;
+	GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(BlastGameplayCueTag, BlastCueParams);
+	GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(ULOLAbilitySystemStatics::GetCameraShakeCueTag(), BlastCueParams);
+
 	K2_EndAbility();
 }
 

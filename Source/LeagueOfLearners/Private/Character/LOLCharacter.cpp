@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "LeagueOfLearners/LeagueOfLearners.h"
 #include "Character/LOLCharacter.h"
+#include "LeagueOfLearners/LeagueOfLearners.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/CapsuleComponent.h"

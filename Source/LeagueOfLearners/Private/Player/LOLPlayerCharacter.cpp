@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "LeagueOfLearners/LeagueOfLearners.h"
 #include "Player/LOLPlayerCharacter.h"
+#include "LeagueOfLearners/LeagueOfLearners.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerController.h"

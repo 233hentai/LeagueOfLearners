@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GAS/LOLGameplayAbility.h"
+#include "GAS/LOLGameplayAbilityTypes.h"
 #include "GA_GroundBlast.generated.h"
 
 /**
@@ -22,6 +23,14 @@ private:
 	UAnimMontage* GroundBlastMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Targeting")
 	TSubclassOf<class ATargetActor_GroundPick> TargetActorClass;
+	UPROPERTY(EditDefaultsOnly, Category = "Targeting")
+	float TargetAreaRadius = 300.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Targeting")
+	float TargetTraceRange = 2000.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	FGenericDamageEffectDef DamageEffectDef;
+	UPROPERTY(EditDefaultsOnly, Category = "Cue")
+	FGameplayTag BlastGameplayCueTag;
 
 	UFUNCTION()
 	void TargetConfirmed(const FGameplayAbilityTargetDataHandle& TargetDataHandle);
