@@ -7,16 +7,20 @@
 #include "GenericTeamAgentInterface.h"
 #include "Abilities/GameplayAbility.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Components/DecalComponent.h"
 
 ATargetActor_GroundPick::ATargetActor_GroundPick()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
+	SetRootComponent(CreateDefaultSubobject<USceneComponent>("Root Component"));
+	DecalComponent = CreateDefaultSubobject<UDecalComponent>("Decal Component");
+	DecalComponent->SetupAttachment(GetRootComponent());
 }
 
 void ATargetActor_GroundPick::SetTargetAreaRadius(float NewRadius)
 {
 	TargetAreaRadius = NewRadius;
+	DecalComponent->DecalSize = FVector{ NewRadius };
 }
 
 void ATargetActor_GroundPick::ConfirmTargetingAndContinue()

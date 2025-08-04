@@ -21,15 +21,16 @@ public:
 	void SetTargetOptions(bool bTargetFriend, bool bTargetEnemy = true);
 	FORCEINLINE void SetShouldDrawDebug(bool bDrawDebug) { bShouldDrawDebug = bDrawDebug; }
 
-protected:
+private:
 	UPROPERTY(EditDefaultsOnly, Category = "Targeting")
 	float TargetTraceRange = 2000.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Targeting")
 	float TargetAreaRadius = 300.f;
+	UPROPERTY(VisibleDefaultsOnly, Category = "Visual")
+	class UDecalComponent* DecalComponent;
 	bool bShouldTargetEnemy = true;
 	bool bShouldTargetFriend = false;
 	bool bShouldDrawDebug = false;
-
 
 	virtual void Tick(float DeltaTime) override;
 	FVector GetTargetPoint() const;
