@@ -12,6 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GAS/LOLAbilitySystemStatics.h"
+#include "GAS/LOLHeroAttributeSet.h"
 
 ALOLPlayerCharacter::ALOLPlayerCharacter()
 {
@@ -26,6 +27,8 @@ ALOLPlayerCharacter::ALOLPlayerCharacter()
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0, 720, 0);
+
+	HeroAttributeSet = CreateDefaultSubobject<ULOLHeroAttributeSet>("Hero Attribute Set");
 }
 
 void ALOLPlayerCharacter::PawnClientRestart()

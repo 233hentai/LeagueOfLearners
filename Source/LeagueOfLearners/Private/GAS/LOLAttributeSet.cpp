@@ -12,6 +12,9 @@ void ULOLAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 	DOREPLIFETIME_CONDITION_NOTIFY(ULOLAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ULOLAttributeSet, Mana, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(ULOLAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ULOLAttributeSet, Attack, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ULOLAttributeSet, Armor, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(ULOLAttributeSet, MoveSpeed, COND_None, REPNOTIFY_Always);
 }
 
 void ULOLAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -49,4 +52,19 @@ void ULOLAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldData)
 void ULOLAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldData)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(ULOLAttributeSet, MaxMana, OldData);
+}
+
+void ULOLAttributeSet::OnRep_Attack(const FGameplayAttributeData& OldData)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ULOLAttributeSet, Attack, OldData);
+}
+
+void ULOLAttributeSet::OnRep_Armor(const FGameplayAttributeData& OldData)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ULOLAttributeSet, Armor, OldData);
+}
+
+void ULOLAttributeSet::OnRep_MoveSpeed(const FGameplayAttributeData& OldData)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ULOLAttributeSet, MoveSpeed, OldData);
 }

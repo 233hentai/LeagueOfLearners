@@ -25,6 +25,9 @@ public:
 	ATTRIBUTE_ACCESSORS(ULOLAttributeSet, MaxHealth);
 	ATTRIBUTE_ACCESSORS(ULOLAttributeSet, Mana);
 	ATTRIBUTE_ACCESSORS(ULOLAttributeSet, MaxMana);
+	ATTRIBUTE_ACCESSORS(ULOLAttributeSet, Attack);
+	ATTRIBUTE_ACCESSORS(ULOLAttributeSet, Armor);
+	ATTRIBUTE_ACCESSORS(ULOLAttributeSet, MoveSpeed);
 
 	virtual void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const override;
 
@@ -39,6 +42,12 @@ private:
 	FGameplayAttributeData Mana;
 	UPROPERTY(ReplicatedUsing = OnRep_MaxMana)
 	FGameplayAttributeData MaxMana;
+	UPROPERTY(ReplicatedUsing = OnRep_Attack)
+	FGameplayAttributeData Attack;
+	UPROPERTY(ReplicatedUsing = OnRep_Armor)
+	FGameplayAttributeData Armor;
+	UPROPERTY(ReplicatedUsing = OnRep_MoveSpeed)
+	FGameplayAttributeData MoveSpeed;
 
 	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldData);
@@ -48,4 +57,10 @@ private:
 	void OnRep_Mana(const FGameplayAttributeData& OldData);
 	UFUNCTION()
 	void OnRep_MaxMana(const FGameplayAttributeData& OldData);
+	UFUNCTION()
+	void OnRep_Attack(const FGameplayAttributeData& OldData);
+	UFUNCTION()
+	void OnRep_Armor(const FGameplayAttributeData& OldData);
+	UFUNCTION()
+	void OnRep_MoveSpeed(const FGameplayAttributeData& OldData);
 };

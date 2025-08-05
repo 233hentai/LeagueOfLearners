@@ -75,6 +75,9 @@ private:
 /*                        Gameplay Ability                         */
 /*******************************************************************/
 private:
+	UPROPERTY()
+	class ULOLHeroAttributeSet* HeroAttributeSet;
+
 	virtual void OnAimStateChanged(bool bIsAiming) override;
 
 /*******************************************************************/
