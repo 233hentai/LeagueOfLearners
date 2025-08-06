@@ -39,8 +39,7 @@ ALOLCharacter::ALOLCharacter()
 void ALOLCharacter::ServerSideInit()
 {
 	LOLAbilitySystemComponent->InitAbilityActorInfo(this,this);
-	LOLAbilitySystemComponent->ApplyInitialEffects();
-	LOLAbilitySystemComponent->GiveInitialAbilities();
+	LOLAbilitySystemComponent->ServerInit();
 }
 
 void ALOLCharacter::ClientSideInit()
@@ -112,12 +111,19 @@ void ALOLCharacter::Server_SendGameplayEventsToSelf_Implementation(const FGamepl
 }
 
 
+void ALOLCharacter::MoveSpeedUpdated(const FOnAttributeChangeData& Data)
+{
+	GetCharacterMovement()->MaxWalkSpeed = Data.NewValue;
+}
+
 void ALOLCharacter::BindGASChangeDelegates()
 {
 	if (LOLAbilitySystemComponent) {
 		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ALOLCharacter::DeathTagUpdated);
 		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetStunStatTag()).AddUObject(this, &ALOLCharacter::StunTagUpdated);
 		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetAimStatTag()).AddUObject(this, &ALOLCharacter::AimTagUpdated);
+		
+		LOLAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(ULOLAttributeSet::GetMoveSpeedAttribute()).AddUObject(this,&ALOLCharacter::MoveSpeedUpdated);
 	}
 }
 

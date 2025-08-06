@@ -23,6 +23,8 @@ public:
     ATTRIBUTE_ACCESSORS(ULOLHeroAttributeSet, Intelligence)
     ATTRIBUTE_ACCESSORS(ULOLHeroAttributeSet, Strength)
     ATTRIBUTE_ACCESSORS(ULOLHeroAttributeSet, Experience)
+	ATTRIBUTE_ACCESSORS(ULOLHeroAttributeSet, StrengthGrowthRate)
+	ATTRIBUTE_ACCESSORS(ULOLHeroAttributeSet, IntelligenceGrowthRate)
     ATTRIBUTE_ACCESSORS(ULOLHeroAttributeSet, PrevLevelExperience)
     ATTRIBUTE_ACCESSORS(ULOLHeroAttributeSet, NextLevelExperience)
     ATTRIBUTE_ACCESSORS(ULOLHeroAttributeSet, Level)
@@ -35,6 +37,12 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_Strength)
 	FGameplayAttributeData Strength;
+
+	UPROPERTY()
+	FGameplayAttributeData IntelligenceGrowthRate;
+
+	UPROPERTY()
+	FGameplayAttributeData StrengthGrowthRate;
 	
 	UPROPERTY(ReplicatedUsing = OnRep_Experience)
 	FGameplayAttributeData Experience;

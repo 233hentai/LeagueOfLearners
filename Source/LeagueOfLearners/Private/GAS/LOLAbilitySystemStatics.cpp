@@ -35,6 +35,26 @@ FGameplayTag ULOLAbilitySystemStatics::GetCameraShakeCueTag()
 	return FGameplayTag::RequestGameplayTag("GameplayCue.CameraShake");
 }
 
+FGameplayTag ULOLAbilitySystemStatics::GetHealthFullTag()
+{
+	return FGameplayTag::RequestGameplayTag("Stats.Health.Full");
+}
+
+FGameplayTag ULOLAbilitySystemStatics::GetHealthEmptyTag()
+{
+	return FGameplayTag::RequestGameplayTag("Stats.Health.Empty");
+}
+
+FGameplayTag ULOLAbilitySystemStatics::GetManaFullTag()
+{
+	return FGameplayTag::RequestGameplayTag("Stats.Mana.Full");
+}
+
+FGameplayTag ULOLAbilitySystemStatics::GetManaEmptyTag()
+{
+	return FGameplayTag::RequestGameplayTag("Stats.Mana.Empty");
+}
+
 float ULOLAbilitySystemStatics::GetStaticCooldownDurationForAbility(const UGameplayAbility* Ability)
 {
 	if(!Ability) return 0.0f;

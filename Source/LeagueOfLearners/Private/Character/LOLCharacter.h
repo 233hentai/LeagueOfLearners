@@ -9,6 +9,7 @@
 #include "GenericTeamAgentInterface.h"
 #include "Abilities/GameplayAbility.h"        
 #include "GAS/LOLGameplayAbilityTypes.h"
+#include "GameplayEffectTypes.h"
 #include "LOLCharacter.generated.h"
 
 UCLASS()
@@ -49,6 +50,7 @@ public:
 	void Server_SendGameplayEventsToSelf(const FGameplayTag& EventTag,const FGameplayEventData& EventData);
 
 private:
+	void MoveSpeedUpdated(const FOnAttributeChangeData& Data);
 	void BindGASChangeDelegates();
 	void DeathTagUpdated(const FGameplayTag Tag,int32 NewCount);
 	void StunTagUpdated(const FGameplayTag Tag, int32 NewCount);

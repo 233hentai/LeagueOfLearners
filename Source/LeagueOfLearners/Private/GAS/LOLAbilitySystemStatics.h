@@ -21,6 +21,11 @@ public:
 	static FGameplayTag GetBasicAttackInputPressedTag();
 	static FGameplayTag GetAimStatTag();
 	static FGameplayTag GetCameraShakeCueTag();
+	static FGameplayTag GetHealthFullTag();
+	static FGameplayTag GetHealthEmptyTag();
+	static FGameplayTag GetManaFullTag();
+	static FGameplayTag GetManaEmptyTag();
+
 
 	static float GetStaticCooldownDurationForAbility(const class UGameplayAbility* Ability);
 	static float GetStaticCostForAbility(const class UGameplayAbility* Ability);
