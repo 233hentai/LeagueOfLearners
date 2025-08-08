@@ -35,5 +35,6 @@ void UStatsGauge::SetValue(float NewValue)
 
 void UStatsGauge::AttributeChanged(const FOnAttributeChangeData& Data)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Set %s to %f"),*Attribute.GetName(), Data.NewValue);
 	SetValue(Data.NewValue);
 }

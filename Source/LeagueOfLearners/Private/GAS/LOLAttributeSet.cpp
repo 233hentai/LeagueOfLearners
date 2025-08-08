@@ -31,9 +31,27 @@ void ULOLAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbac
 {
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute()) {
 		SetHealth(FMath::Clamp(GetHealth(),0.f,GetMaxHealth()));
+		SetCachedHealthPercent(GetHealth()/GetMaxHealth());
 	}
 	if (Data.EvaluatedData.Attribute == GetManaAttribute()) {
 		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
+		SetCachedManaPercent(GetMana()/GetMaxMana());
+	}
+}
+
+void ULOLAttributeSet::RescaleHealth()
+{
+	if (!GetOwningActor()->HasAuthority()) return;
+	if (GetCachedHealthPercent() != 0 && GetHealth() != 0) {
+		SetHealth(GetMaxHealth()*GetCachedHealthPercent());
+	}
+}
+
+void ULOLAttributeSet::RescaleMana()
+{
+	if (!GetOwningActor()->HasAuthority()) return;
+	if (GetCachedManaPercent() != 0 && GetMana() != 0) {
+		SetMana(GetMaxMana() * GetCachedManaPercent());
 	}
 }
 

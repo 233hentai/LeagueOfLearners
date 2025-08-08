@@ -50,13 +50,15 @@ public:
 	void Server_SendGameplayEventsToSelf(const FGameplayTag& EventTag,const FGameplayEventData& EventData);
 
 private:
-	void MoveSpeedUpdated(const FOnAttributeChangeData& Data);
 	void BindGASChangeDelegates();
 	void DeathTagUpdated(const FGameplayTag Tag,int32 NewCount);
 	void StunTagUpdated(const FGameplayTag Tag, int32 NewCount);
 	void AimTagUpdated(const FGameplayTag Tag, int32 NewCount);
 	void SetIsAiming(bool bIsAiming);
 	virtual void OnAimStateChanged(bool bIsAiming);
+	void MoveSpeedUpdated(const FOnAttributeChangeData& Data);
+	void MaxHealthUpdated(const FOnAttributeChangeData& Data);
+	void MaxManaUpdated(const FOnAttributeChangeData& Data);
 	UPROPERTY(VisibleDefaultsOnly, Category = "UI")
 	class ULOLAbilitySystemComponent* LOLAbilitySystemComponent;
 	UPROPERTY()

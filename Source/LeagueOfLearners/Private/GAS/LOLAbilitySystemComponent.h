@@ -22,6 +22,7 @@ public:
 	void InitializeBaseAttributes();
 	void ApplyFullStatEffect();
 	const TMap<ELOLAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const;
+	bool IsAtMaxLevel() const;
 
 private:
 	void ApplyInitialEffects();
@@ -30,22 +31,12 @@ private:
 
 	void HealthUpdated(const FOnAttributeChangeData& ChangeData);
 	void ManaUpdated(const FOnAttributeChangeData& ChangeData);
-
-	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
-	TArray<TSubclassOf<UGameplayEffect>> InitialEffects;
+	void ExperienceUpdated(const FOnAttributeChangeData& ChangeData);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Ability")
 	TMap<ELOLAbilityInputID,TSubclassOf<UGameplayAbility>> Abilities;
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Ability")
 	TMap<ELOLAbilityInputID,TSubclassOf<UGameplayAbility>> BasicAbilities;
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Ability")
-	TArray<TSubclassOf<UGameplayAbility>> PassiveAbilities;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
-	TSubclassOf<UGameplayEffect> FullStatEffect;
-	UPROPERTY(EditDefaultsOnly, Category = "Gameplay Effects")
-	TSubclassOf<UGameplayEffect> DeathEffect;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Base Stats")
-	UDataTable* BaseStatsDataTable;
+	class UPA_AbilitySystemGenerics* AbilitySystemGenerics;
 };

@@ -116,6 +116,20 @@ void ALOLCharacter::MoveSpeedUpdated(const FOnAttributeChangeData& Data)
 	GetCharacterMovement()->MaxWalkSpeed = Data.NewValue;
 }
 
+void ALOLCharacter::MaxHealthUpdated(const FOnAttributeChangeData& Data)
+{
+	if (IsValid(LOLAttributeSet)) {
+		LOLAttributeSet->RescaleHealth();
+	}
+}
+
+void ALOLCharacter::MaxManaUpdated(const FOnAttributeChangeData& Data)
+{
+	if (IsValid(LOLAttributeSet)) {
+		LOLAttributeSet->RescaleMana();
+	}
+}
+
 void ALOLCharacter::BindGASChangeDelegates()
 {
 	if (LOLAbilitySystemComponent) {
@@ -124,6 +138,8 @@ void ALOLCharacter::BindGASChangeDelegates()
 		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetAimStatTag()).AddUObject(this, &ALOLCharacter::AimTagUpdated);
 		
 		LOLAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(ULOLAttributeSet::GetMoveSpeedAttribute()).AddUObject(this,&ALOLCharacter::MoveSpeedUpdated);
+		LOLAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(ULOLAttributeSet::GetMaxHealthAttribute()).AddUObject(this,&ALOLCharacter::MaxHealthUpdated);
+		LOLAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(ULOLAttributeSet::GetMaxManaAttribute()).AddUObject(this,&ALOLCharacter::MaxManaUpdated);
 	}
 }
 

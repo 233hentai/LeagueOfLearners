@@ -8,11 +8,13 @@
 #include "GAS/LOLAbilitySystemStatics.h"
 #include "GameplayEffectExtension.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "GAS/PA_AbilitySystemGenerics.h"
 
 ULOLAbilitySystemComponent::ULOLAbilitySystemComponent()
 {
 	GetGameplayAttributeValueChangeDelegate(ULOLAttributeSet::GetHealthAttribute()).AddUObject(this,&ULOLAbilitySystemComponent::HealthUpdated);
 	GetGameplayAttributeValueChangeDelegate(ULOLAttributeSet::GetManaAttribute()).AddUObject(this,&ULOLAbilitySystemComponent::ManaUpdated);
+	GetGameplayAttributeValueChangeDelegate(ULOLHeroAttributeSet::GetExperienceAttribute()).AddUObject(this,&ULOLAbilitySystemComponent::ExperienceUpdated);
 	GenericConfirmInputID = (int32)ELOLAbilityInputID::Confirm;
 	GenericCancelInputID = (int32)ELOLAbilityInputID::Cancel;
 }
@@ -26,7 +28,8 @@ void ULOLAbilitySystemComponent::ServerInit()
 
 void ULOLAbilitySystemComponent::InitializeBaseAttributes()
 {
-	if (!BaseStatsDataTable||!GetOwner()) return;
+	if (!AbilitySystemGenerics|| !AbilitySystemGenerics->GetBaseStatsDataTable()||!GetOwner()) return;
+	const UDataTable* BaseStatsDataTable = AbilitySystemGenerics->GetBaseStatsDataTable();
 	const FHeroBaseStats* BaseStats = nullptr;
 	for (const TPair<FName, uint8*>& DataPair : BaseStatsDataTable->GetRowMap()) {
 		BaseStats = BaseStatsDataTable->FindRow<FHeroBaseStats>(DataPair.Key,"");
@@ -43,6 +46,15 @@ void ULOLAbilitySystemComponent::InitializeBaseAttributes()
 		SetNumericAttributeBase(ULOLHeroAttributeSet::GetIntelligenceAttribute(), BaseStats->Intelligence);
 		SetNumericAttributeBase(ULOLHeroAttributeSet::GetIntelligenceGrowthRateAttribute(), BaseStats->IntelligenceGrowthRate);
 	}
+	const FRealCurve* ExperienceCurve = AbilitySystemGenerics->GetExperienceCurve();
+	if (ExperienceCurve) {
+		int MaxLevel = ExperienceCurve->GetNumKeys();
+		SetNumericAttributeBase(ULOLHeroAttributeSet::GetMaxLevelAttribute(), MaxLevel);
+		float MaxLevelExperience = ExperienceCurve->GetKeyValue(ExperienceCurve->GetLastKeyHandle());
+		SetNumericAttributeBase(ULOLHeroAttributeSet::GetMaxLevelExperienceAttribute(), MaxLevelExperience);
+		//UE_LOG(LogTemp, Warning, TEXT("max level is %d, max level exp is %f"),MaxLevel,MaxLevelExperience);
+	}
+	ExperienceUpdated(FOnAttributeChangeData());
 }
 
 void ULOLAbilitySystemComponent::ApplyInitialEffects()
@@ -50,7 +62,8 @@ void ULOLAbilitySystemComponent::ApplyInitialEffects()
 	if (!GetOwner() || !GetOwner()->HasAuthority()) {
 		return;
 	}
-	for (const TSubclassOf<UGameplayEffect>& EffectClass: InitialEffects) {
+	if (!AbilitySystemGenerics) return;
+	for (const TSubclassOf<UGameplayEffect>& EffectClass: AbilitySystemGenerics->GetInitialEffects()) {
 		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingSpec(EffectClass,1,MakeEffectContext());
 		ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 	}
@@ -67,20 +80,30 @@ void ULOLAbilitySystemComponent::GiveInitialAbilities()
 	for (const TPair<ELOLAbilityInputID, TSubclassOf<UGameplayAbility>>& AbilityPair : BasicAbilities) {
 		GiveAbility(FGameplayAbilitySpec(AbilityPair.Value, 1, (int32)AbilityPair.Key, nullptr));
 	}
-	for (const TSubclassOf<UGameplayAbility>& PassiveAbility : PassiveAbilities) {
+	if (!AbilitySystemGenerics) return;
+	for (const TSubclassOf<UGameplayAbility>& PassiveAbility : AbilitySystemGenerics->GetPassiveAbilities()) {
 		GiveAbility(FGameplayAbilitySpec(PassiveAbility,1,-1,nullptr));
 	}
 }
 
 void ULOLAbilitySystemComponent::ApplyFullStatEffect()
 {
-	AuthApplyGameplayEffect(FullStatEffect);
+	if (!AbilitySystemGenerics) return;
+	AuthApplyGameplayEffect(AbilitySystemGenerics->GetFullStatEffect());
 }
 
 
 const TMap<ELOLAbilityInputID, TSubclassOf<UGameplayAbility>>& ULOLAbilitySystemComponent::GetAbilities() const
 {
 	return Abilities;
+}
+
+bool ULOLAbilitySystemComponent::IsAtMaxLevel() const
+{
+	bool bFound;
+	float CurrentLevel = GetGameplayAttributeValue(ULOLHeroAttributeSet::GetLevelAttribute(),bFound);
+	float MaxLevel = GetGameplayAttributeValue(ULOLHeroAttributeSet::GetMaxLevelAttribute(),bFound);
+	return CurrentLevel >= MaxLevel;
 }
 
 void ULOLAbilitySystemComponent::AuthApplyGameplayEffect(TSubclassOf<UGameplayEffect> Effect, int Level)
@@ -109,8 +132,8 @@ void ULOLAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& Cha
 	if (ChangeData.NewValue <= 0) {
 		if (!HasMatchingGameplayTag(ULOLAbilitySystemStatics::GetHealthEmptyTag())) {
 			AddLooseGameplayTag(ULOLAbilitySystemStatics::GetHealthEmptyTag());
-			if (DeathEffect) {
-				AuthApplyGameplayEffect(DeathEffect);
+			if (AbilitySystemGenerics&&AbilitySystemGenerics->GetDeathEffect()) {
+				AuthApplyGameplayEffect(AbilitySystemGenerics->GetDeathEffect());
 			}
 			FGameplayEventData DeadAbilityEventData;
 			if (ChangeData.GEModData) {
@@ -145,4 +168,41 @@ void ULOLAbilitySystemComponent::ManaUpdated(const FOnAttributeChangeData& Chang
 	else {
 		RemoveLooseGameplayTag(ULOLAbilitySystemStatics::GetManaEmptyTag());
 	}
+}
+
+void ULOLAbilitySystemComponent::ExperienceUpdated(const FOnAttributeChangeData& ChangeData)
+{
+	if (!GetOwner() || !GetOwner()->HasAuthority()) return;
+	if (IsAtMaxLevel()) return;
+	if (!AbilitySystemGenerics) return;
+	float CurrentExp = ChangeData.NewValue;
+	//UE_LOG(LogTemp, Warning, TEXT("CurrentExp:%f"),CurrentExp);
+	const FRealCurve* ExperienceCurve = AbilitySystemGenerics->GetExperienceCurve();
+	if (!ExperienceCurve) {
+		UE_LOG(LogTemp, Warning, TEXT("Can't find EXP Data!"));
+		return;
+	}
+	float PrevLevelEXP = 0;
+	float NextLevelEXP = 0;
+	float NewLevel = 1;
+	for (auto Iter = ExperienceCurve->GetKeyHandleIterator(); Iter; ++Iter) {
+		float EXPToReachLevel = ExperienceCurve->GetKeyValue(*Iter);
+		if (CurrentExp < EXPToReachLevel) {
+			NextLevelEXP = EXPToReachLevel;
+			break;
+		}
+		PrevLevelEXP = EXPToReachLevel;
+		NewLevel = Iter.GetIndex() + 1;
+	}
+	float CurrentLevel = GetNumericAttributeBase(ULOLHeroAttributeSet::GetLevelAttribute());
+	float CurrentUpgradePoint = GetNumericAttributeBase(ULOLHeroAttributeSet::GetUpgradePointAttribute());
+	float LevelUpgraded = NewLevel - CurrentLevel;
+	float NewUpgradePoint = CurrentUpgradePoint + LevelUpgraded;
+	//UE_LOG(LogTemp, Warning, TEXT("NewUpgradePoint:%f, CurrentUpgradePoint:%f, LevelUpgraded:%f"), NewUpgradePoint, CurrentUpgradePoint, LevelUpgraded);
+	SetNumericAttributeBase(ULOLHeroAttributeSet::GetLevelAttribute(),NewLevel);
+	SetNumericAttributeBase(ULOLHeroAttributeSet::GetPrevLevelExperienceAttribute(), PrevLevelEXP);
+	//UE_LOG(LogTemp, Warning, TEXT("NextLevelEXP:%f"), NextLevelEXP);
+	SetNumericAttributeBase(ULOLHeroAttributeSet::GetNextLevelExperienceAttribute(), NextLevelEXP);
+	SetNumericAttributeBase(ULOLHeroAttributeSet::GetUpgradePointAttribute(), NewUpgradePoint);
+	//UE_LOG(LogTemp, Warning, TEXT("Upgrade Point now is %f"), GetNumericAttributeBase(ULOLHeroAttributeSet::GetUpgradePointAttribute()));
 }
