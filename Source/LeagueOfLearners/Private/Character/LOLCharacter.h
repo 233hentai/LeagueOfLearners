@@ -49,6 +49,9 @@ public:
 	UFUNCTION(Server,Reliable,WithValidation)
 	void Server_SendGameplayEventsToSelf(const FGameplayTag& EventTag,const FGameplayEventData& EventData);
 
+protected:
+	void UpGradeAbilityWithInputID(ELOLAbilityInputID InputID);
+
 private:
 	void BindGASChangeDelegates();
 	void DeathTagUpdated(const FGameplayTag Tag,int32 NewCount);

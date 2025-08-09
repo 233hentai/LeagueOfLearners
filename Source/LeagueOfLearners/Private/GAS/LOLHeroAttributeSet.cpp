@@ -68,5 +68,5 @@ void ULOLHeroAttributeSet::OnRep_Gold(const FGameplayAttributeData& OldValue)
 
 void ULOLHeroAttributeSet::OnRep_UpgradePoint(const FGameplayAttributeData& OldValue)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(ULOLHeroAttributeSet, Level, OldValue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(ULOLHeroAttributeSet, UpgradePoint, OldValue);
 }

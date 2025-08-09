@@ -24,6 +24,11 @@ public:
 	const TMap<ELOLAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const;
 	bool IsAtMaxLevel() const;
 
+	UFUNCTION(Server,Reliable,WithValidation)
+	void Server_UpGradeAbilityWithInputID(ELOLAbilityInputID InputID);
+	UFUNCTION(Client,Reliable)
+	void Client_AbilitySpecLevelUpdated(FGameplayAbilitySpecHandle SpecHandle, int NewLevel);
+
 private:
 	void ApplyInitialEffects();
 	void GiveInitialAbilities();

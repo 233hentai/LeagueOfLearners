@@ -7,6 +7,9 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "LOLAbilitySystemStatics.generated.h"
 
+class UGameplayAbility;
+struct FGameplayAbilitySpec;
+class UAbilitySystemComponent;
 /**
  * 
  */
@@ -30,7 +33,13 @@ public:
 	static FGameplayTag GetGoldAttributeTag();
 
 	static bool IsHero(const AActor* Actor);
+	static bool IsAbilityAtMaxLevel(const FGameplayAbilitySpec& Spec);
 
 	static float GetStaticCooldownDurationForAbility(const class UGameplayAbility* Ability);
 	static float GetStaticCostForAbility(const class UGameplayAbility* Ability);
+
+	static bool CheckCost(const FGameplayAbilitySpec& AbilitySpec,const UAbilitySystemComponent& ASC);
+	static float GetManaCostFor(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent& ASC, int AbilityLevel);
+	static float GetCooldownDurationFor(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent& ASC, int AbilityLevel);
+	static float GetCooldownRemaining(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent& ASC);
 };

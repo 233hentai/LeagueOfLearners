@@ -50,9 +50,16 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "INPUT")
 	class UInputMappingContext* GameplayInputMappingContext;
+
+	UPROPERTY(EditDefaultsOnly, Category = "INPUT")
+	class UInputAction* UpgradeAbilityAction;
 	
 	void HandleLookInput(const FInputActionValue& InputActionValue);
 	void HandleMoveInput(const FInputActionValue& InputActionValue);
+
+	void HandleUpgradeAbilityDown(const FInputActionValue& InputActionValue);
+	void HandleUpgradeAbilityUp(const FInputActionValue& InputActionValue);
+	bool bIsUpgradeAbilityDown = false;
 
 	void HandleAbilityInput(const FInputActionValue& InputActionValue,ELOLAbilityInputID InputID);
 	void SetInputEnabledFromPlayerController(bool bEnabled);

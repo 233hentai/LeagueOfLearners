@@ -54,6 +54,9 @@ void ALOLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &ALOLPlayerCharacter::HandleLookInput);
 		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &ALOLPlayerCharacter::HandleMoveInput);
 
+		EnhancedInputComponent->BindAction(UpgradeAbilityAction, ETriggerEvent::Started, this, &ALOLPlayerCharacter::HandleUpgradeAbilityDown);
+		EnhancedInputComponent->BindAction(UpgradeAbilityAction, ETriggerEvent::Completed, this, &ALOLPlayerCharacter::HandleUpgradeAbilityUp);
+
 		for (const TPair<ELOLAbilityInputID, class UInputAction*> InputActionPair : GameplayAbilityInputActions) {
 			EnhancedInputComponent->BindAction(InputActionPair.Value, ETriggerEvent::Triggered, this, &ALOLPlayerCharacter::HandleAbilityInput, InputActionPair.Key);
 		}
@@ -75,9 +78,25 @@ void ALOLPlayerCharacter::HandleMoveInput(const FInputActionValue& InputActionVa
 	AddMovementInput(GetMoveForwardDirection()*InputValue.Y+GetLookRightDirection()*InputValue.X);
 }
 
+void ALOLPlayerCharacter::HandleUpgradeAbilityDown(const FInputActionValue& InputActionValue)
+{
+	bIsUpgradeAbilityDown = true;
+}
+
+void ALOLPlayerCharacter::HandleUpgradeAbilityUp(const FInputActionValue& InputActionValue)
+{
+	bIsUpgradeAbilityDown = false;
+}
+
 void ALOLPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionValue, ELOLAbilityInputID InputID)
 {
 	bool bPressed = InputActionValue.Get<bool>();
+
+	if (bPressed && bIsUpgradeAbilityDown) {
+		UpGradeAbilityWithInputID(InputID);
+		return;
+	}
+
 	if (bPressed) {
 		GetAbilitySystemComponent()->AbilityLocalInputPressed((int32)InputID);
 	}

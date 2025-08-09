@@ -17,6 +17,8 @@ class ULOLGameplayAbility : public UGameplayAbility
 
 public:
 	ULOLGameplayAbility();
+	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
+
 protected:
 	class UAnimInstance* GetOwnerAnimInstance() const;
 	TArray<FHitResult> GetHitResultFromSweepLocationTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SweepSphereRadius = 30.f, ETeamAttitude::Type TargetTeam=ETeamAttitude::Hostile,bool bDrawDebug = false,bool bIgnoreSelf=true) const;

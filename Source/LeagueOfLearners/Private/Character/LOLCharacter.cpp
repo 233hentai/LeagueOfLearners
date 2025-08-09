@@ -130,6 +130,13 @@ void ALOLCharacter::MaxManaUpdated(const FOnAttributeChangeData& Data)
 	}
 }
 
+void ALOLCharacter::UpGradeAbilityWithInputID(ELOLAbilityInputID InputID)
+{
+	if (LOLAbilitySystemComponent) {
+		LOLAbilitySystemComponent->Server_UpGradeAbilityWithInputID(InputID);
+	}
+}
+
 void ALOLCharacter::BindGASChangeDelegates()
 {
 	if (LOLAbilitySystemComponent) {
