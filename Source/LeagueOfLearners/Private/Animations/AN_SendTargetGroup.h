@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "GameplayTagContainer.h"
+#include "GenericTeamAgentInterface.h"
 #include "AN_SendTargetGroup.generated.h"
 
 /**
@@ -22,4 +23,17 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Gameplay Ability")
 	TArray<FName> TargetSocketNames;
 
+	UPROPERTY(EditAnywhere, Category = "Gameplay Ability")
+	FGameplayTagContainer TriggerGameplayCueTags;
+	UPROPERTY(EditAnywhere, Category = "Gameplay Ability")
+	TEnumAsByte<ETeamAttitude::Type> TargetTeam = ETeamAttitude::Hostile;
+	UPROPERTY(EditAnywhere, Category = "Gameplay Ability")
+	bool bDrawDebug = true;
+	UPROPERTY(EditAnywhere, Category = "Gameplay Ability")
+	bool bIgnoreOwner = true;
+	UPROPERTY(EditAnywhere, Category = "Gameplay Ability")
+	float SphereSweepRadius = 60.f;
+
+
+	void SendLocalGameplayCue(const FHitResult& HitResult) const;
 };

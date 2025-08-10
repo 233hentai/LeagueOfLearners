@@ -24,8 +24,6 @@ private:
 	TMap<FName, FGenericDamageEffectDef> ComboDamageMap;
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* UppercutMontage;
-	UPROPERTY(EditDefaultsOnly, Category = "Targeting")
-	float SweepSphereRadius = 80.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Launch")
 	float UppercutLaunchSpeed = 1000.f;
 	UPROPERTY(EditDefaultsOnly, Category = "Launch")
