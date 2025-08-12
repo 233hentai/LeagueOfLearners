@@ -30,18 +30,22 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
-private:
-	void SpawnGameplayWidget();
+	virtual void SetupInputComponent() override;
 
+private:
 	UPROPERTY()
 	class ALOLPlayerCharacter* LOLPlayerCharacter;
-
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UGameplayWidget> GameplayWidgetClass;
-
 	UPROPERTY()
 	class UGameplayWidget* GameplayWidget;
-
 	UPROPERTY(Replicated)
 	FGenericTeamId TeamID;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputMappingContext* UIInputMapping;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* ShopSwitchInputAction;
+
+	void SpawnGameplayWidget();
+	void SwitchShopVisibility();
 };

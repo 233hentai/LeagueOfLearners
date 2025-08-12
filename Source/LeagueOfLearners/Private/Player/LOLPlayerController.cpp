@@ -5,6 +5,8 @@
 #include "Player/LOLPlayerCharacter.h"
 #include "Widgets/GameplayWidget.h"
 #include "Net/UnrealNetwork.h"
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
 
 void ALOLPlayerController::OnPossess(APawn* NewPawn)
 {
@@ -43,6 +45,21 @@ void ALOLPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME(ALOLPlayerController,TeamID);
 }
 
+void ALOLPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	if (InputSubsystem) {
+		InputSubsystem->RemoveMappingContext(UIInputMapping);
+		InputSubsystem->AddMappingContext(UIInputMapping, 1);
+	}
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
+	if (EnhancedInputComponent) {
+		EnhancedInputComponent->BindAction(ShopSwitchInputAction, ETriggerEvent::Triggered, this, &ALOLPlayerController::SwitchShopVisibility);
+	}
+}
+
 void ALOLPlayerController::SpawnGameplayWidget()
 {
 	if (!IsLocalPlayerController()) return;
@@ -50,5 +67,12 @@ void ALOLPlayerController::SpawnGameplayWidget()
 	if (GameplayWidget) {
 		GameplayWidget->AddToViewport();
 		GameplayWidget->ConfigureAbilities(LOLPlayerCharacter->GetAbilities());
+	}
+}
+
+void ALOLPlayerController::SwitchShopVisibility()
+{
+	if (GameplayWidget) {
+		GameplayWidget->SwitchShopVisibility();
 	}
 }

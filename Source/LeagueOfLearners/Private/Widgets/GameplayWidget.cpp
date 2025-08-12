@@ -8,6 +8,7 @@
 #include "Widgets/AbilityListView.h"
 #include "GAS/LOLAttributeSet.h"
 #include "GAS/LOLAbilitySystemComponent.h"
+#include "Widgets/ShopWidget.h"
 
 void UGameplayWidget::NativeConstruct()
 {
@@ -23,4 +24,61 @@ void UGameplayWidget::NativeConstruct()
 void UGameplayWidget::ConfigureAbilities(const TMap<ELOLAbilityInputID, TSubclassOf<class UGameplayAbility>>& Abilities)
 {
 	AbilityListView->ConfigureAbilities(Abilities);
+}
+
+void UGameplayWidget::SwitchShopVisibility()
+{
+	if (ShopWidget->GetVisibility() == ESlateVisibility::HitTestInvisible) {
+		ShopWidget->SetVisibility(ESlateVisibility::Visible);
+		PlayShopPopupAnimation(true);
+		SetOwningPawnInputEnabled(false);
+		SetShowMouseCursor(true);
+		SetFocusToGameAndUI();
+		ShopWidget->SetFocus();
+	}
+	else {
+		ShopWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+		PlayShopPopupAnimation(false);
+		SetOwningPawnInputEnabled(true);
+		SetShowMouseCursor(false);
+		SetFocusToGameOnly();
+	}
+}
+
+void UGameplayWidget::PlayShopPopupAnimation(bool bPlayForward)
+{
+	if (bPlayForward) {
+		PlayAnimationForward(ShopPopupAnimation);
+	}
+	else {
+		PlayAnimationReverse(ShopPopupAnimation);
+	}
+}
+
+void UGameplayWidget::SetOwningPawnInputEnabled(bool bEnabled)
+{
+	if (bEnabled) {
+		GetOwningPlayerPawn()->EnableInput(GetOwningPlayer());
+	}
+	else {
+		GetOwningPlayerPawn()->DisableInput(GetOwningPlayer());
+	}
+}
+
+void UGameplayWidget::SetShowMouseCursor(bool bShowMouse)
+{
+	GetOwningPlayer()->SetShowMouseCursor(bShowMouse);
+}
+
+void UGameplayWidget::SetFocusToGameAndUI()
+{
+	FInputModeGameAndUI GameAndUIMode;
+	GameAndUIMode.SetHideCursorDuringCapture(false);
+	GetOwningPlayer()->SetInputMode(GameAndUIMode);
+}
+
+void UGameplayWidget::SetFocusToGameOnly()
+{
+	FInputModeGameOnly GameOnlyMode;
+	GetOwningPlayer()->SetInputMode(GameOnlyMode);
 }

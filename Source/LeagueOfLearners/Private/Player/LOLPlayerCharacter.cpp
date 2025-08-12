@@ -13,6 +13,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GAS/LOLAbilitySystemStatics.h"
 #include "GAS/LOLHeroAttributeSet.h"
+#include "Inventory/InventoryComponent.h"
 
 ALOLPlayerCharacter::ALOLPlayerCharacter()
 {
@@ -29,6 +30,8 @@ ALOLPlayerCharacter::ALOLPlayerCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0, 720, 0);
 
 	HeroAttributeSet = CreateDefaultSubobject<ULOLHeroAttributeSet>("Hero Attribute Set");
+
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>("Inventory Component");
 }
 
 void ALOLPlayerCharacter::PawnClientRestart()
