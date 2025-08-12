@@ -4,10 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Inventory/InventoryItem.h"
 #include "InventoryComponent.generated.h"
 
 class UAbilitySystemComponent;
 class UPA_ShopItem;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, UInventoryItem*);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UInventoryComponent : public UActorComponent
@@ -17,7 +20,7 @@ class UInventoryComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UInventoryComponent();
-
+	FOnItemAddedDelegate OnItemAdded;
 	void TryPurchase(const UPA_ShopItem* ItemToPurchase);
 	float GetGold() const;
 
@@ -28,6 +31,8 @@ protected:
 private:
 	UPROPERTY()
 	UAbilitySystemComponent* OwnerAbilitySystemComponent;
+	UPROPERTY()
+	TMap<FInventoryItemHandle, UInventoryItem*> InventoryMap;
 
 /*************************************************/
 /*                     Server                    */
@@ -35,4 +40,13 @@ private:
 private:
 	UFUNCTION(Server,Reliable,WithValidation)
 	void Server_Purchase(const UPA_ShopItem* ItemToPurchase);
+
+	void GrantItem(const UPA_ShopItem* NewShopItem);
+
+/*************************************************/
+/*                     Client                    */
+/*************************************************/
+private:
+	UFUNCTION(Client,Reliable)
+	void Client_ItemAdded(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem);
 };

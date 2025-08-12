@@ -43,12 +43,35 @@ void UInventoryComponent::BeginPlay()
 	
 }
 
+void UInventoryComponent::GrantItem(const UPA_ShopItem* NewShopItem)
+{
+	if (!GetOwner()->HasAuthority()) return;
+	UInventoryItem* InventoryItem = NewObject<UInventoryItem>();
+	FInventoryItemHandle NewHandle = FInventoryItemHandle::CreateHandle();
+	InventoryItem->InitItem(NewHandle, NewShopItem);
+	InventoryMap.Add(NewHandle, InventoryItem);
+	OnItemAdded.Broadcast(InventoryItem);
+	UE_LOG(LogTemp, Warning, TEXT("Server Adding Shop Item: %s, With ID:%d"),*(InventoryItem->GetShopItem()->GetItemName().ToString()),NewHandle.GetHandleID());
+	Client_ItemAdded(NewHandle, NewShopItem);
+	InventoryItem->ApplyGASModifications(OwnerAbilitySystemComponent);
+}
+
+void UInventoryComponent::Client_ItemAdded_Implementation(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem)
+{
+	if (GetOwner()->HasAuthority()) return;
+	UInventoryItem* InventoryItem = NewObject<UInventoryItem>();
+	InventoryItem->InitItem(AssignedHandle, NewItem);
+	InventoryMap.Add(AssignedHandle, InventoryItem);
+	OnItemAdded.Broadcast(InventoryItem);
+	UE_LOG(LogTemp, Warning, TEXT("Client Adding Shop Item: %s, With ID:%d"), *(InventoryItem->GetShopItem()->GetItemName().ToString()), AssignedHandle.GetHandleID());
+}
+
 void UInventoryComponent::Server_Purchase_Implementation(const UPA_ShopItem* ItemToPurchase)
 {
 	if (!ItemToPurchase) return;
 	if (GetGold() < ItemToPurchase->GetPrice()) return;
 	OwnerAbilitySystemComponent->ApplyModToAttribute(ULOLHeroAttributeSet::GetGoldAttribute(), EGameplayModOp::Additive, -ItemToPurchase->GetPrice());
-	UE_LOG(LogTemp, Warning, TEXT("Bought:%s"),*(ItemToPurchase->GetName()));
+	GrantItem(ItemToPurchase);
 }
 
 bool UInventoryComponent::Server_Purchase_Validate(const UPA_ShopItem* ItemToPurchase)
