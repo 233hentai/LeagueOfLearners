@@ -43,6 +43,8 @@ private:
 	UWidgetAnimation* ShopPopupAnimation;
 	UPROPERTY()
 	class UAbilitySystemComponent* OwnerAbilitySystemComponent;
+	UPROPERTY(meta = (BindWidget))
+	class UInventoryWidget* InventoryWidget;
 
 	void PlayShopPopupAnimation(bool bPlayForward);
 	void SetOwningPawnInputEnabled(bool bEnabled);

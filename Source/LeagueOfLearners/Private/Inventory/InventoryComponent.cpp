@@ -33,6 +33,47 @@ float UInventoryComponent::GetGold() const
 	return 0.f;
 }
 
+void UInventoryComponent::ItemSlotChanged(const FInventoryItemHandle& Handle, int NewSlotNumber)
+{
+	if (UInventoryItem* FoundItem = GetInventoryItemFromHandle(Handle)) {
+		FoundItem->SetSlot(NewSlotNumber);
+	}
+}
+
+UInventoryItem* UInventoryComponent::GetInventoryItemFromHandle(const FInventoryItemHandle& Handle) const
+{
+	UInventoryItem* const* FoundItem = InventoryMap.Find(Handle);
+	if (FoundItem) {
+		return *FoundItem;
+	}
+	return nullptr;
+}
+
+bool UInventoryComponent::IsAllSlotOccupied() const
+{
+	return InventoryMap.Num() >= GetCapacity();
+}
+
+UInventoryItem* UInventoryComponent::GetAvailableStackForItem(const UPA_ShopItem* Item) const
+{
+	if (!Item->IsStackable()) return nullptr;
+	for (const TPair<FInventoryItemHandle, UInventoryItem*> ItemPair : InventoryMap) {
+		if (ItemPair.Value && ItemPair.Value->IsForItem(Item) && !ItemPair.Value->IsStackFull()) {
+			return ItemPair.Value;
+		}
+	}
+	return nullptr;
+}
+
+bool UInventoryComponent::IsFullFor(const UPA_ShopItem* Item) const
+{
+	if (!Item) return false;
+	if (IsAllSlotOccupied()) {
+		return GetAvailableStackForItem(Item) == nullptr;
+	}
+	return false;
+}
+
 
 // Called when the game starts
 void UInventoryComponent::BeginPlay()
@@ -46,14 +87,32 @@ void UInventoryComponent::BeginPlay()
 void UInventoryComponent::GrantItem(const UPA_ShopItem* NewShopItem)
 {
 	if (!GetOwner()->HasAuthority()) return;
-	UInventoryItem* InventoryItem = NewObject<UInventoryItem>();
-	FInventoryItemHandle NewHandle = FInventoryItemHandle::CreateHandle();
-	InventoryItem->InitItem(NewHandle, NewShopItem);
-	InventoryMap.Add(NewHandle, InventoryItem);
-	OnItemAdded.Broadcast(InventoryItem);
-	UE_LOG(LogTemp, Warning, TEXT("Server Adding Shop Item: %s, With ID:%d"),*(InventoryItem->GetShopItem()->GetItemName().ToString()),NewHandle.GetHandleID());
-	Client_ItemAdded(NewHandle, NewShopItem);
-	InventoryItem->ApplyGASModifications(OwnerAbilitySystemComponent);
+
+	if (UInventoryItem* StackItem = GetAvailableStackForItem(NewShopItem)) {
+		StackItem->AddStackCount();
+		OnItemStackCountChanged.Broadcast(StackItem->GetHandle(), StackItem->GetStackCount());
+		Client_ItemStackChanged(StackItem->GetHandle(), StackItem->GetStackCount());
+	}
+	else {
+		UInventoryItem* InventoryItem = NewObject<UInventoryItem>();
+		FInventoryItemHandle NewHandle = FInventoryItemHandle::CreateHandle();
+		InventoryItem->InitItem(NewHandle, NewShopItem);
+		InventoryMap.Add(NewHandle, InventoryItem);
+		OnItemAdded.Broadcast(InventoryItem);
+		UE_LOG(LogTemp, Warning, TEXT("Server Adding Shop Item: %s, With ID:%d"), *(InventoryItem->GetShopItem()->GetItemName().ToString()), NewHandle.GetHandleID());
+		Client_ItemAdded(NewHandle, NewShopItem);
+		InventoryItem->ApplyGASModifications(OwnerAbilitySystemComponent);
+	}
+}
+
+void UInventoryComponent::Client_ItemStackChanged_Implementation(FInventoryItemHandle Handle, int NewCount)
+{
+	if (GetOwner()->HasAuthority()) return;
+	UInventoryItem* FoundItem = GetInventoryItemFromHandle(Handle);
+	if (FoundItem) {
+		FoundItem->SetStackCount(NewCount);
+		OnItemStackCountChanged.Broadcast(Handle, NewCount); 
+	}
 }
 
 void UInventoryComponent::Client_ItemAdded_Implementation(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem)
@@ -70,6 +129,7 @@ void UInventoryComponent::Server_Purchase_Implementation(const UPA_ShopItem* Ite
 {
 	if (!ItemToPurchase) return;
 	if (GetGold() < ItemToPurchase->GetPrice()) return;
+	if (IsFullFor(ItemToPurchase)) return;
 	OwnerAbilitySystemComponent->ApplyModToAttribute(ULOLHeroAttributeSet::GetGoldAttribute(), EGameplayModOp::Additive, -ItemToPurchase->GetPrice());
 	GrantItem(ItemToPurchase);
 }

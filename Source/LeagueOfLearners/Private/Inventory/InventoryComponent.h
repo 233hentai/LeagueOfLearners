@@ -10,7 +10,8 @@
 class UAbilitySystemComponent;
 class UPA_ShopItem;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, UInventoryItem*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, const UInventoryItem*);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemStackCountChangedDelegate, const FInventoryItemHandle&, int);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UInventoryComponent : public UActorComponent
@@ -21,14 +22,23 @@ public:
 	// Sets default values for this component's properties
 	UInventoryComponent();
 	FOnItemAddedDelegate OnItemAdded;
+	FOnItemStackCountChangedDelegate OnItemStackCountChanged;
 	void TryPurchase(const UPA_ShopItem* ItemToPurchase);
 	float GetGold() const;
+	FORCEINLINE int GetCapacity() const { return Capacity; }
+	void ItemSlotChanged(const FInventoryItemHandle& Handle, int NewSlotNumber);
+	UInventoryItem* GetInventoryItemFromHandle(const FInventoryItemHandle& Handle) const;
+	bool IsAllSlotOccupied() const;
+	UInventoryItem* GetAvailableStackForItem(const UPA_ShopItem* Item) const;
+	bool IsFullFor(const UPA_ShopItem* Item) const;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 private:
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	int Capacity = 6;
 	UPROPERTY()
 	UAbilitySystemComponent* OwnerAbilitySystemComponent;
 	UPROPERTY()
@@ -49,4 +59,6 @@ private:
 private:
 	UFUNCTION(Client,Reliable)
 	void Client_ItemAdded(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem);
+	UFUNCTION(Client,Reliable)
+	void Client_ItemStackChanged(FInventoryItemHandle Handle, int NewCount);
 };

@@ -53,6 +53,10 @@ uint32 GetTypeHash(const FInventoryItemHandle& Key)
 	return Key.GetHandleID();
 }
 
+UInventoryItem::UInventoryItem() :StackCount{1}
+{
+}
+
 void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem)
 {
 	Handle = NewHandle;
@@ -78,4 +82,50 @@ void UInventoryItem::ApplyGASModifications(UAbilitySystemComponent* AbilitySyste
 			GrantedAbilitySpecHandle = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(GrantedAbility));
 		}
 	}
+}
+
+bool UInventoryItem::IsValid() const
+{
+	return ShopItem != nullptr;
+}
+
+void UInventoryItem::SetSlot(int NewSlot)
+{
+	Slot = NewSlot;
+}
+
+bool UInventoryItem::IsStackFull() const
+{
+	return StackCount >= GetShopItem()->GetMaxStackCount();
+}
+
+bool UInventoryItem::IsForItem(const UPA_ShopItem* Item) const
+{
+	if (!Item) return false;
+	return GetShopItem() == Item;
+}
+
+bool UInventoryItem::AddStackCount()
+{
+	if (IsStackFull()) return false;
+	++StackCount;
+	return true;
+}
+
+bool UInventoryItem::ReduceStackCount()
+{
+	--StackCount;
+	if (StackCount <= 0) {
+		return false;
+	}
+	return true;
+}
+
+bool UInventoryItem::SetStackCount(int NewCount)
+{
+	if (NewCount > 0 && NewCount <= GetShopItem()->GetMaxStackCount()) {
+		StackCount = NewCount;
+		return true;
+	}
+	return false;
 }
