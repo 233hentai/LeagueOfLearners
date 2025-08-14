@@ -11,6 +11,7 @@ class UAbilitySystemComponent;
 class UPA_ShopItem;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, const UInventoryItem*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemovedDelegate, const FInventoryItemHandle&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemStackCountChangedDelegate, const FInventoryItemHandle&, int);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -22,6 +23,7 @@ public:
 	// Sets default values for this component's properties
 	UInventoryComponent();
 	FOnItemAddedDelegate OnItemAdded;
+	FOnItemRemovedDelegate OnItemRemoved;
 	FOnItemStackCountChangedDelegate OnItemStackCountChanged;
 	void TryPurchase(const UPA_ShopItem* ItemToPurchase);
 	float GetGold() const;
@@ -31,6 +33,8 @@ public:
 	bool IsAllSlotOccupied() const;
 	UInventoryItem* GetAvailableStackForItem(const UPA_ShopItem* Item) const;
 	bool IsFullFor(const UPA_ShopItem* Item) const;
+	void TryActivateItem(const FInventoryItemHandle& ItemHandle);
+	void SellItem(const FInventoryItemHandle& ItemHandle);
 
 protected:
 	// Called when the game starts
@@ -50,8 +54,15 @@ private:
 private:
 	UFUNCTION(Server,Reliable,WithValidation)
 	void Server_Purchase(const UPA_ShopItem* ItemToPurchase);
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_ActivateItem(FInventoryItemHandle ItemHandle);
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_SellItem(FInventoryItemHandle ItemHandle);
 
 	void GrantItem(const UPA_ShopItem* NewShopItem);
+	void ConsumeItem(UInventoryItem* Item);
+	void RemoveItem(UInventoryItem* Item);
+
 
 /*************************************************/
 /*                     Client                    */
@@ -59,6 +70,8 @@ private:
 private:
 	UFUNCTION(Client,Reliable)
 	void Client_ItemAdded(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem);
+	UFUNCTION(Client,Reliable)
+	void Client_ItemRemoved(FInventoryItemHandle ItemHandle);
 	UFUNCTION(Client,Reliable)
 	void Client_ItemStackChanged(FInventoryItemHandle Handle, int NewCount);
 };

@@ -9,6 +9,7 @@
 
 
 class UInventoryItemWidget;
+class UInventoryContextMenuWidget;
 /**
  * 
  */
@@ -19,6 +20,7 @@ class UInventoryWidget : public UUserWidget
 	
 public:
 	virtual void NativeConstruct() override;
+	virtual void NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent) override;
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -29,9 +31,24 @@ private:
 	class UInventoryComponent* InventoryComponent;
 	TArray<UInventoryItemWidget*> ItemWidgets;
 	TMap<FInventoryItemHandle, UInventoryItemWidget*> StoredItemEntryWidgets;
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	TSubclassOf<UInventoryContextMenuWidget> ContextMenuWidgetClass;
+	UPROPERTY()
+	UInventoryContextMenuWidget* ContextMenuWidget;
+	FInventoryItemHandle CurrentFocusedItemHandle;
 
 	void ItemAdded(const UInventoryItem* InventoryItem);
 	void ItemStackCountChanged(const FInventoryItemHandle& Handle, int NewCount);
 	UInventoryItemWidget* GetNextAvailableSlot() const;
 	void HandleItemDragDrop(UInventoryItemWidget* DestinationWidget, UInventoryItemWidget* SourceWidget);
+	void ItemRemoved(const FInventoryItemHandle& ItemHandle);
+
+	UFUNCTION()
+	void UseFocusedItem();
+	UFUNCTION()
+	void SellFocusedItem();
+	void SpawnContextMenu();
+	void SetContextMenuVisible(bool bContextMenuVisible);
+	void SwitchContextMenu(const FInventoryItemHandle& ItemHandle);
+	void ClearContextMenu();
 };

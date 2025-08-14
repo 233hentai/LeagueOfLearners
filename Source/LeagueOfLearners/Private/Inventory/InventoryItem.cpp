@@ -84,6 +84,17 @@ void UInventoryItem::ApplyGASModifications(UAbilitySystemComponent* AbilitySyste
 	}
 }
 
+void UInventoryItem::RemoveGASModifications(UAbilitySystemComponent* AbilitySystemComponent)
+{
+	if (!AbilitySystemComponent) return;
+	if (AppliedEquipedEffectHandle.IsValid()) {
+		AbilitySystemComponent->RemoveActiveGameplayEffect(AppliedEquipedEffectHandle);
+	}
+	if (GrantedAbilitySpecHandle.IsValid()) {
+		AbilitySystemComponent->SetRemoveAbilityOnEnd(GrantedAbilitySpecHandle);
+	}
+}
+
 bool UInventoryItem::IsValid() const
 {
 	return ShopItem != nullptr;
@@ -128,4 +139,19 @@ bool UInventoryItem::SetStackCount(int NewCount)
 		return true;
 	}
 	return false;
+}
+
+bool UInventoryItem::TryActivateGrantedAbility(UAbilitySystemComponent* AbilitySystemComponent)
+{
+	if (!GrantedAbilitySpecHandle.IsValid()) return false;
+	if (AbilitySystemComponent && AbilitySystemComponent->TryActivateAbility(GrantedAbilitySpecHandle)) return true;
+	return false;
+}
+
+void UInventoryItem::ApplyConsumeEffect(UAbilitySystemComponent* AbilitySystemComponent)
+{
+	if (!ShopItem) return;
+	TSubclassOf<UGameplayEffect> ConsumeEffect = ShopItem->GetConsumeEffect();
+	if (!ConsumeEffect) return;
+	AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(ConsumeEffect, 1, AbilitySystemComponent->MakeEffectContext());
 }

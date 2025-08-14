@@ -49,6 +49,7 @@ public:
 	const UPA_ShopItem* GetShopItem() const { return ShopItem; }
 	FInventoryItemHandle GetHandle() const { return Handle; }
 	void ApplyGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
+	void RemoveGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
 	bool IsValid() const;
 	FORCEINLINE int GetStackCount() const { return StackCount; }
 	void SetSlot(int NewSlot);
@@ -57,6 +58,8 @@ public:
 	bool AddStackCount();
 	bool ReduceStackCount();
 	bool SetStackCount(int NewCount);
+	bool TryActivateGrantedAbility(UAbilitySystemComponent* AbilitySystemComponent);
+	void ApplyConsumeEffect(UAbilitySystemComponent* AbilitySystemComponent);
 
 private:
 	UPROPERTY()
