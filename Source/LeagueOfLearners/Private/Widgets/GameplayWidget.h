@@ -45,6 +45,8 @@ private:
 	class UAbilitySystemComponent* OwnerAbilitySystemComponent;
 	UPROPERTY(meta = (BindWidget))
 	class UInventoryWidget* InventoryWidget;
+	UPROPERTY(meta = (BindWidget))
+	class USkeletalMeshRenderWidget* HeadshotWidget;
 
 	void PlayShopPopupAnimation(bool bPlayForward);
 	void SetOwningPawnInputEnabled(bool bEnabled);
