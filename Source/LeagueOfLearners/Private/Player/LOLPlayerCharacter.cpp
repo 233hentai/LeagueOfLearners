@@ -63,6 +63,7 @@ void ALOLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		for (const TPair<ELOLAbilityInputID, class UInputAction*> InputActionPair : GameplayAbilityInputActions) {
 			EnhancedInputComponent->BindAction(InputActionPair.Value, ETriggerEvent::Triggered, this, &ALOLPlayerCharacter::HandleAbilityInput, InputActionPair.Key);
 		}
+		EnhancedInputComponent->BindAction(UseInventoryItemAction, ETriggerEvent::Triggered, this, &ALOLPlayerCharacter::UseInventoryItem);
 	}
 }
 
@@ -124,6 +125,12 @@ void ALOLPlayerCharacter::SetInputEnabledFromPlayerController(bool bEnabled)
 	else {
 		DisableInput(PlayerController);
 	}
+}
+
+void ALOLPlayerCharacter::UseInventoryItem(const FInputActionValue& InputActionValue)
+{
+	int Value = FMath::RoundToInt(InputActionValue.Get<float>());
+	InventoryComponent->TryActivateItemInSlot(Value - 1);
 }
 
 void ALOLPlayerCharacter::OnDead()

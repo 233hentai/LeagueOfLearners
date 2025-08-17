@@ -53,6 +53,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "INPUT")
 	class UInputAction* UpgradeAbilityAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "INPUT")
+	class UInputAction* UseInventoryItemAction;
 	
 	void HandleLookInput(const FInputActionValue& InputActionValue);
 	void HandleMoveInput(const FInputActionValue& InputActionValue);
@@ -63,6 +66,8 @@ private:
 
 	void HandleAbilityInput(const FInputActionValue& InputActionValue,ELOLAbilityInputID InputID);
 	void SetInputEnabledFromPlayerController(bool bEnabled);
+
+	void UseInventoryItem(const FInputActionValue& InputActionValue);
 
 /*******************************************************************/
 /*                       Death and Respawn                         */

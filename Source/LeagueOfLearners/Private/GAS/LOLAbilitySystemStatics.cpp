@@ -119,6 +119,14 @@ bool ULOLAbilitySystemStatics::CheckCost(const FGameplayAbilitySpec& AbilitySpec
 	return false;
 }
 
+bool ULOLAbilitySystemStatics::CheckCostStatic(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent& ASC)
+{
+	if (AbilityCDO) {
+		return AbilityCDO->CheckCost(FGameplayAbilitySpecHandle(), ASC.AbilityActorInfo.Get());
+	}
+	return false;
+}
+
 float ULOLAbilitySystemStatics::GetManaCostFor(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent& ASC, int AbilityLevel)
 {
 	float ManaCost = 0.f;

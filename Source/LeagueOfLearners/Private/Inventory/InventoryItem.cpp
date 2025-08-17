@@ -7,6 +7,7 @@
 #include "GameplayEffect.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GAS/LOLAbilitySystemStatics.h"
+#include "GAS/LOLAttributeSet.h"
 
 FInventoryItemHandle::FInventoryItemHandle() :HandleID{GetInvalidID()}
 {
@@ -57,41 +58,53 @@ UInventoryItem::UInventoryItem() :StackCount{1}
 {
 }
 
-void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem)
+void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem, UAbilitySystemComponent* AbilitySystemComponent)
 {
 	Handle = NewHandle;
 	ShopItem = NewShopItem;
+	OwnerAbilitySystemComponent = AbilitySystemComponent;
+	if (OwnerAbilitySystemComponent) {
+		OwnerAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(ULOLAttributeSet::GetManaAttribute()).AddUObject(this, &UInventoryItem::ManaUpdated);
+	}
+	ApplyGASModifications();
 }
 
-void UInventoryItem::ApplyGASModifications(UAbilitySystemComponent* AbilitySystemComponent)
+void UInventoryItem::ApplyGASModifications()
 {
 	if (!GetShopItem()) return;
-	if (!AbilitySystemComponent->GetOwner() || !AbilitySystemComponent->GetOwner()->HasAuthority()) return;
+	if (!OwnerAbilitySystemComponent->GetOwner() || !OwnerAbilitySystemComponent->GetOwner()->HasAuthority()) return;
 
 	TSubclassOf<UGameplayEffect> EquipEffect = GetShopItem()->GetEquippedEffect();
 	if (EquipEffect) {
-		AppliedEquipedEffectHandle = AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(EquipEffect, 1, AbilitySystemComponent->MakeEffectContext());
+		AppliedEquipedEffectHandle = OwnerAbilitySystemComponent->BP_ApplyGameplayEffectToSelf(EquipEffect, 1, OwnerAbilitySystemComponent->MakeEffectContext());
 	}
 	TSubclassOf<UGameplayAbility> GrantedAbility = GetShopItem()->GetGrantedAbility();
 	if (GrantedAbility) {
-		const FGameplayAbilitySpec* FoundSpec = AbilitySystemComponent->FindAbilitySpecFromClass(GrantedAbility);
-		if (FoundSpec) {
-			GrantedAbilitySpecHandle = FoundSpec->Handle;
-		}
-		else {
-			GrantedAbilitySpecHandle = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(GrantedAbility));
-		}
+		GrantedAbilitySpecHandle = OwnerAbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(GrantedAbility));
 	}
 }
 
-void UInventoryItem::RemoveGASModifications(UAbilitySystemComponent* AbilitySystemComponent)
+FGameplayAbilitySpecHandle UInventoryItem::GetGrantedAbilitySpecHandle() const
 {
-	if (!AbilitySystemComponent) return;
-	if (AppliedEquipedEffectHandle.IsValid()) {
-		AbilitySystemComponent->RemoveActiveGameplayEffect(AppliedEquipedEffectHandle);
-	}
-	if (GrantedAbilitySpecHandle.IsValid()) {
-		AbilitySystemComponent->SetRemoveAbilityOnEnd(GrantedAbilitySpecHandle);
+	return GrantedAbilitySpecHandle;
+}
+
+void UInventoryItem::SetGrantedAbilitySpecHandle(FGameplayAbilitySpecHandle SpecHandle)
+{
+	GrantedAbilitySpecHandle = SpecHandle;
+}
+
+void UInventoryItem::RemoveGASModifications()
+{
+	if (!OwnerAbilitySystemComponent) return;
+	OwnerAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(ULOLAttributeSet::GetManaAttribute()).RemoveAll(this);
+	if (OwnerAbilitySystemComponent->GetOwner()->HasAuthority()) {
+		if (AppliedEquipedEffectHandle.IsValid()) {
+			OwnerAbilitySystemComponent->RemoveActiveGameplayEffect(AppliedEquipedEffectHandle);
+		}
+		if (GrantedAbilitySpecHandle.IsValid()) {
+			OwnerAbilitySystemComponent->SetRemoveAbilityOnEnd(GrantedAbilitySpecHandle);
+		}
 	}
 }
 
@@ -141,17 +154,63 @@ bool UInventoryItem::SetStackCount(int NewCount)
 	return false;
 }
 
-bool UInventoryItem::TryActivateGrantedAbility(UAbilitySystemComponent* AbilitySystemComponent)
+bool UInventoryItem::TryActivateGrantedAbility()
 {
 	if (!GrantedAbilitySpecHandle.IsValid()) return false;
-	if (AbilitySystemComponent && AbilitySystemComponent->TryActivateAbility(GrantedAbilitySpecHandle)) return true;
+	if (OwnerAbilitySystemComponent && OwnerAbilitySystemComponent->TryActivateAbility(GrantedAbilitySpecHandle)) return true;
 	return false;
 }
 
-void UInventoryItem::ApplyConsumeEffect(UAbilitySystemComponent* AbilitySystemComponent)
+void UInventoryItem::ApplyConsumeEffect()
 {
 	if (!ShopItem) return;
 	TSubclassOf<UGameplayEffect> ConsumeEffect = ShopItem->GetConsumeEffect();
 	if (!ConsumeEffect) return;
-	AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(ConsumeEffect, 1, AbilitySystemComponent->MakeEffectContext());
+	OwnerAbilitySystemComponent->BP_ApplyGameplayEffectToSelf(ConsumeEffect, 1, OwnerAbilitySystemComponent->MakeEffectContext());
+}
+
+float UInventoryItem::GetAbilityCooldownTimeRemaining() const
+{
+	if (!IsGrantingAnyAbility()) return 0.f;
+	return ULOLAbilitySystemStatics::GetCooldownRemaining(GetShopItem()->GetGrantedAbilityCDO(), *OwnerAbilitySystemComponent);
+}
+
+float UInventoryItem::GetAbilityCooldownDuration() const
+{
+	if (!IsGrantingAnyAbility()) return 0.f;
+	return ULOLAbilitySystemStatics::GetCooldownDurationFor(GetShopItem()->GetGrantedAbilityCDO(), *OwnerAbilitySystemComponent, 1);
+}
+
+float UInventoryItem::GetAbilityManaCost() const
+{
+	if (!IsGrantingAnyAbility()) return 0.f;
+	return ULOLAbilitySystemStatics::GetManaCostFor(GetShopItem()->GetGrantedAbilityCDO(), *OwnerAbilitySystemComponent, 1);
+}
+
+bool UInventoryItem::CanCastAbility() const
+{
+	if (!IsGrantingAnyAbility() || !OwnerAbilitySystemComponent) return false;
+	FGameplayAbilitySpec* Spec = OwnerAbilitySystemComponent->FindAbilitySpecFromHandle(GrantedAbilitySpecHandle);
+	if (Spec) {
+		return ULOLAbilitySystemStatics::CheckCost(*Spec, *OwnerAbilitySystemComponent);
+	}
+	return ULOLAbilitySystemStatics::CheckCostStatic(GetShopItem()->GetGrantedAbilityCDO(), *OwnerAbilitySystemComponent);
+}
+
+bool UInventoryItem::IsGrantingAbility(TSubclassOf<class UGameplayAbility> AbilityClass) const
+{
+	if (!ShopItem) return false;
+	TSubclassOf<UGameplayAbility> GrantedAbility = ShopItem->GetGrantedAbility();
+	return GrantedAbility == AbilityClass;
+}
+
+bool UInventoryItem::IsGrantingAnyAbility() const
+{
+	if (!ShopItem) return false;
+	return ShopItem->GetGrantedAbility() != nullptr;
+}
+
+void UInventoryItem::ManaUpdated(const FOnAttributeChangeData& ChangeData)
+{
+	OnAbilityCanCastUpdated.Broadcast(CanCastAbility());
 }

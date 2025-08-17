@@ -13,6 +13,7 @@ class UPA_ShopItem;
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, const UInventoryItem*);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemovedDelegate, const FInventoryItemHandle&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemStackCountChangedDelegate, const FInventoryItemHandle&, int);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnItemAbilityCommitedDelegate, const FInventoryItemHandle&, float /*总冷却时长*/,float/*剩余冷却时长*/);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UInventoryComponent : public UActorComponent
@@ -25,6 +26,7 @@ public:
 	FOnItemAddedDelegate OnItemAdded;
 	FOnItemRemovedDelegate OnItemRemoved;
 	FOnItemStackCountChangedDelegate OnItemStackCountChanged;
+	FOnItemAbilityCommitedDelegate OnItemAbilityCommited;
 	void TryPurchase(const UPA_ShopItem* ItemToPurchase);
 	float GetGold() const;
 	FORCEINLINE int GetCapacity() const { return Capacity; }
@@ -35,6 +37,9 @@ public:
 	bool IsFullFor(const UPA_ShopItem* Item) const;
 	void TryActivateItem(const FInventoryItemHandle& ItemHandle);
 	void SellItem(const FInventoryItemHandle& ItemHandle);
+	bool FindIngredientForItem(const UPA_ShopItem* Item, TArray<UInventoryItem*>& OutIngredients, const TArray<const UPA_ShopItem*>& IngredientToIgnore = TArray<const UPA_ShopItem*>{});
+	UInventoryItem* TryGetItemForShopItem(const UPA_ShopItem* Item) const;
+	void TryActivateItemInSlot(int SlotNumber);
 
 protected:
 	// Called when the game starts
@@ -47,6 +52,8 @@ private:
 	UAbilitySystemComponent* OwnerAbilitySystemComponent;
 	UPROPERTY()
 	TMap<FInventoryItemHandle, UInventoryItem*> InventoryMap;
+
+	void AbilityCommited(class UGameplayAbility* CommitedAbility);
 
 /*************************************************/
 /*                     Server                    */
@@ -62,6 +69,7 @@ private:
 	void GrantItem(const UPA_ShopItem* NewShopItem);
 	void ConsumeItem(UInventoryItem* Item);
 	void RemoveItem(UInventoryItem* Item);
+	bool TryItemCombination(const UPA_ShopItem* NewItem);
 
 
 /*************************************************/
@@ -69,7 +77,7 @@ private:
 /*************************************************/
 private:
 	UFUNCTION(Client,Reliable)
-	void Client_ItemAdded(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem);
+	void Client_ItemAdded(FInventoryItemHandle AssignedHandle, const UPA_ShopItem* NewItem, FGameplayAbilitySpecHandle GrantedAbilitySpecHandle);
 	UFUNCTION(Client,Reliable)
 	void Client_ItemRemoved(FInventoryItemHandle ItemHandle);
 	UFUNCTION(Client,Reliable)

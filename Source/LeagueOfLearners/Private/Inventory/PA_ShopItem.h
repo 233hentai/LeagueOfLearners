@@ -44,6 +44,7 @@ public:
 	TSubclassOf<class UGameplayEffect> GetEquippedEffect() const { return EquippedEffect; }
 	TSubclassOf<class UGameplayEffect> GetConsumeEffect() const { return ConsumeEffect; }
 	TSubclassOf<class UGameplayAbility> GetGrantedAbility() const { return GrantedAbility; }
+	class UGameplayAbility* GetGrantedAbilityCDO() const;
 	const TArray<TSoftObjectPtr<UPA_ShopItem>>& GetIngredientItems() const { return IngredientItems; }
 
 private:

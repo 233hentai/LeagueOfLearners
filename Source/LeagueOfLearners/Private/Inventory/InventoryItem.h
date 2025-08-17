@@ -11,6 +11,8 @@
 class UPA_ShopItem;
 class UAbilitySystemComponent;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAbilityCanCastUpdatedDelegate, bool)
+
 USTRUCT()
 struct FInventoryItemHandle
 {
@@ -44,24 +46,35 @@ class UInventoryItem : public UObject
 	GENERATED_BODY()
 	
 public:
+	FOnAbilityCanCastUpdatedDelegate OnAbilityCanCastUpdated;
+
 	UInventoryItem();
-	void InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem);
+	void InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem, UAbilitySystemComponent* AbilitySystemComponent);
 	const UPA_ShopItem* GetShopItem() const { return ShopItem; }
 	FInventoryItemHandle GetHandle() const { return Handle; }
-	void ApplyGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
-	void RemoveGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
+	void RemoveGASModifications();
 	bool IsValid() const;
 	FORCEINLINE int GetStackCount() const { return StackCount; }
 	void SetSlot(int NewSlot);
+	int GetItemSlot() const { return Slot; }
 	bool IsStackFull() const;
 	bool IsForItem(const UPA_ShopItem* Item) const;
 	bool AddStackCount();
 	bool ReduceStackCount();
 	bool SetStackCount(int NewCount);
-	bool TryActivateGrantedAbility(UAbilitySystemComponent* AbilitySystemComponent);
-	void ApplyConsumeEffect(UAbilitySystemComponent* AbilitySystemComponent);
-
+	bool TryActivateGrantedAbility();
+	void ApplyConsumeEffect();
+	float GetAbilityCooldownTimeRemaining() const;
+	float GetAbilityCooldownDuration() const;
+	float GetAbilityManaCost() const;
+	bool CanCastAbility() const;
+	bool IsGrantingAbility(TSubclassOf<class UGameplayAbility> AbilityClass) const;
+	bool IsGrantingAnyAbility() const;
+	void ApplyGASModifications();
+	FGameplayAbilitySpecHandle GetGrantedAbilitySpecHandle() const;
+	void SetGrantedAbilitySpecHandle(FGameplayAbilitySpecHandle SpecHandle);
 private:
+	UAbilitySystemComponent* OwnerAbilitySystemComponent;
 	UPROPERTY()
 	const UPA_ShopItem* ShopItem;
 	FInventoryItemHandle Handle;
@@ -70,4 +83,6 @@ private:
 
 	FActiveGameplayEffectHandle AppliedEquipedEffectHandle;
 	FGameplayAbilitySpecHandle GrantedAbilitySpecHandle;
+
+	void ManaUpdated(const FOnAttributeChangeData& ChangeData);
 };

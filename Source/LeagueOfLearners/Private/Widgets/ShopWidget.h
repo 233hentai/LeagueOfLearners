@@ -24,6 +24,8 @@ public:
 private:
 	UPROPERTY(meta = (BindWidget))
 	UTileView* ShopItemList;
+	UPROPERTY(meta = (BindWidget))
+	class UItemTreeWidget* CombinationTree;
 	UPROPERTY()
 	TMap<const UPA_ShopItem*, const UShopItemWidget*> ItemsMap;
 	UPROPERTY()
@@ -32,4 +34,5 @@ private:
 	void LoadShopItems();
 	void ShopItemLoadFinished();
 	void ShopItemWidgetGenerated(UUserWidget& NewWidget);
+	void ShowItemCombination(const UShopItemWidget* ItemWidget);
 };

@@ -20,6 +20,7 @@ void UInventoryWidget::NativeConstruct()
 			InventoryComponent->OnItemAdded.AddUObject(this, &UInventoryWidget::ItemAdded);
 			InventoryComponent->OnItemRemoved.AddUObject(this, &UInventoryWidget::ItemRemoved);
 			InventoryComponent->OnItemStackCountChanged.AddUObject(this, &UInventoryWidget::ItemStackCountChanged);
+			InventoryComponent->OnItemAbilityCommited.AddUObject(this, &UInventoryWidget::ItemAbilityCommited);
 			int Capacity = InventoryComponent->GetCapacity();
 			ItemList->ClearChildren();
 			for (int i = 0; i < Capacity; ++i) {
@@ -102,6 +103,14 @@ void UInventoryWidget::ItemRemoved(const FInventoryItemHandle& ItemHandle)
 	if (FoundItemWidget && *FoundItemWidget) {
 		(*FoundItemWidget)->EmptySlot();
 		StoredItemEntryWidgets.Remove(ItemHandle);
+	}
+}
+
+void UInventoryWidget::ItemAbilityCommited(const FInventoryItemHandle& ItemHandle, float CooldownDuration, float CooldownTimeRemaining)
+{
+	UInventoryItemWidget** FoundWidget = StoredItemEntryWidgets.Find(ItemHandle);
+	if (FoundWidget && *FoundWidget) {
+		(*FoundWidget)->StartCooldown(CooldownDuration,CooldownTimeRemaining);
 	}
 }
 

@@ -42,6 +42,7 @@ private:
 	UInventoryItemWidget* GetNextAvailableSlot() const;
 	void HandleItemDragDrop(UInventoryItemWidget* DestinationWidget, UInventoryItemWidget* SourceWidget);
 	void ItemRemoved(const FInventoryItemHandle& ItemHandle);
+	void ItemAbilityCommited(const FInventoryItemHandle& ItemHandle, float CooldownDuration, float CooldownTimeRemaining);
 
 	UFUNCTION()
 	void UseFocusedItem();

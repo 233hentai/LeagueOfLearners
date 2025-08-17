@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/ItemWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"
+#include "Widgets/TreeNodeInterface.h"
 #include "ShopItemWidget.generated.h"
 
 class UPA_ShopItem;
@@ -16,7 +17,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnShopItemSelected, const UShopItemWidget*)
  * 
  */
 UCLASS()
-class UShopItemWidget : public UItemWidget, public IUserObjectListEntry
+class UShopItemWidget : public UItemWidget, public IUserObjectListEntry, public ITreeNodeInterface
 {
 	GENERATED_BODY()
 	
@@ -25,11 +26,21 @@ public:
 	FOnShopItemSelected OnShopItemSelected;
 
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
-	FORCEINLINE const UPA_ShopItem* GetShopItem() { return ShopItem; }
+	FORCEINLINE const UPA_ShopItem* GetShopItem() const { return ShopItem; }
+
+	virtual UUserWidget* GetWidget() const override;
+	virtual TArray<const ITreeNodeInterface*> GetInputs() const override;
+	virtual TArray<const ITreeNodeInterface*> GetOutputs() const override;
+	virtual const UObject* GetItemObject() const override;
 
 private:
+	UPROPERTY()
 	const UPA_ShopItem* ShopItem;
+	const class UListView* ParentListView;
 
 	virtual void RightMouseButtonClicked() override;
 	virtual void LeftMouseButtonClicked() override;
+	void InitWithShopItem(const UPA_ShopItem* NewShopItem);
+	void CopyFromOther(const UShopItemWidget* OtherWidget);
+	TArray<const ITreeNodeInterface*> ItemsToInterfaces(const TArray<const UPA_ShopItem*>& Items) const;
 };

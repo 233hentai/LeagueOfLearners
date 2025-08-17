@@ -39,6 +39,7 @@ public:
 	static float GetStaticCostForAbility(const class UGameplayAbility* Ability);
 
 	static bool CheckCost(const FGameplayAbilitySpec& AbilitySpec,const UAbilitySystemComponent& ASC);
+	static bool CheckCostStatic(const UGameplayAbility* AbilityCDO,const UAbilitySystemComponent& ASC);
 	static float GetManaCostFor(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent& ASC, int AbilityLevel);
 	static float GetCooldownDurationFor(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent& ASC, int AbilityLevel);
 	static float GetCooldownRemaining(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent& ASC);

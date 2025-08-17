@@ -19,7 +19,7 @@ UCLASS()
 class UInventoryItemWidget : public UItemWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 	FOnInventoryItemDroppedDelegate OnInventoryItemDropped;
 	FOnButtonClickDelegate OnLeftButtonClick;
@@ -53,13 +53,47 @@ private:
 	virtual void RightMouseButtonClicked() override;
 	virtual void LeftMouseButtonClicked() override;
 
-/****************************************************/
-/*                      Drag Drop                   */
-/****************************************************/
+	void UpdateCanCastDisplay(bool bCanCast);
+
+	/****************************************************/
+	/*                      Drag Drop                   */
+	/****************************************************/
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Drag Drop")
 	TSubclassOf<class UInventoryItemDragDropOperation> DragDropOpClass;
 
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+
+/****************************************************/
+/*                        GAS                       */
+/****************************************************/
+public:
+	void StartCooldown(float CooldownDuration, float TimeRemaining);
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Cooldown")
+	float CooldownUpdateInterval = 0.1f;
+	UPROPERTY(EditDefaultsOnly, Category = "Cooldown")
+	FName CooldownAmountDynamicMaterialParamName = "Percent";
+	UPROPERTY(EditDefaultsOnly, Category = "Cooldown")
+	FName IconTextureDynamicMaterialParamName = "Icon";
+	UPROPERTY(EditDefaultsOnly, Category = "Cooldown")
+	FName CanCastDynamicMaterialParamName = "CanCast";
+
+	const UAbilitySystemComponent* OwnerAbilitySystemComponent;
+	FTimerHandle CooldownDurationTimerHandle;
+	FTimerHandle CooldownUpdateTimerHandle;
+	float CooldownTimeRemaining = 0.f;
+	float CooldownTimeDuration = 0.f;
+	FNumberFormattingOptions CooldownDisplayFormattingOptions;
+
+	void CooldownFinished();
+	void UpdateCooldown();
+	void ClearCooldown();
+	virtual void SetIcon(UTexture2D* IconTexture) override;
+
+	void BindCanCastAbilityDelegate();
+	void UnbindCanCastAbilityDelegate();
+
 };

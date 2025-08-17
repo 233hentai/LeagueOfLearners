@@ -28,6 +28,16 @@ bool ULOLAssetManager::GetLoadedShopItems(TArray<const UPA_ShopItem*>& OutItems)
 	return bLoaded;
 }
 
+const FItemCollection* ULOLAssetManager::GetCombinationForItem(const UPA_ShopItem* Item) const
+{
+	return CombinationMap.Find(Item);
+}
+
+const FItemCollection* ULOLAssetManager::GetIngredientForItem(const UPA_ShopItem* Item) const
+{
+	return IngredientMap.Find(Item);
+}
+
 void ULOLAssetManager::ShopItemLoadFinished(FStreamableDelegate Callback)
 {
 	Callback.ExecuteIfBound();
