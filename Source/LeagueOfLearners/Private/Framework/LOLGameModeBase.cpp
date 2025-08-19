@@ -4,6 +4,8 @@
 #include "Framework/LOLGameModeBase.h"
 #include "GameFramework/PlayerStart.h"
 #include "EngineUtils.h"
+#include "Framework/StormCore.h"
+#include "Player/LOLPlayerController.h"
 
 APlayerController* ALOLGameModeBase::SpawnPlayerController(ENetRole InRemoteRole, const FString& Options)
 {
@@ -17,6 +19,15 @@ APlayerController* ALOLGameModeBase::SpawnPlayerController(ENetRole InRemoteRole
     NewPlayerController->StartSpot = FindNextStartSpotForTeam(TeamID);
 
     return NewPlayerController;
+}
+
+void ALOLGameModeBase::StartPlay()
+{
+    Super::StartPlay();
+    AStormCore* StormCore = GetStormCore();
+    if (StormCore) {
+        StormCore->OnGoalReached.AddUObject(this, &ALOLGameModeBase::MatchFinished);
+    }
 }
 
 FGenericTeamId ALOLGameModeBase::GetTeamIDForPlayer(const APlayerController* PlayerController) const
@@ -38,4 +49,25 @@ AActor* ALOLGameModeBase::FindNextStartSpotForTeam(const FGenericTeamId& TeamID)
         }
     }
     return nullptr;
+}
+
+AStormCore* ALOLGameModeBase::GetStormCore() const
+{
+    UWorld* World = GetWorld();
+    if (World) {
+        for (TActorIterator<AStormCore> It(World); It; ++It) {
+            return *It;
+        }
+    }
+    return nullptr;
+}
+
+void ALOLGameModeBase::MatchFinished(AActor* ViewTarget, int WinnerTeam)
+{
+    UWorld* World = GetWorld();
+    if (World) {
+        for (TActorIterator<ALOLPlayerController> It(World); It; ++It) {
+            It->MatchFinished(ViewTarget, WinnerTeam);
+        }
+    }
 }

@@ -19,6 +19,10 @@ public:
 	virtual void NativeConstruct() override;
 	void ConfigureAbilities(const TMap<ELOLAbilityInputID, TSubclassOf<class UGameplayAbility>>& Abilities);
 	void SwitchShopVisibility();
+	void ShowGameplayMenu();
+	void SetGameplayMenuTitle(const FString& NewTitle);
+	UFUNCTION()
+	void SwitchGameplayMenu();
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -47,6 +51,16 @@ private:
 	class UInventoryWidget* InventoryWidget;
 	UPROPERTY(meta = (BindWidget))
 	class USkeletalMeshRenderWidget* HeadshotWidget;
+	UPROPERTY(meta = (BindWidget))
+	class UMatchStatWidget* MatchStatWidget;
+	UPROPERTY(meta = (BindWidget))
+	class UGameplayMenu* GameplayMenu;
+	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher* MainSwitcher;
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* GameplayWidgetRootPanel;
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* GameplayMenuRootPanel;
 
 	void PlayShopPopupAnimation(bool bPlayForward);
 	void SetOwningPawnInputEnabled(bool bEnabled);

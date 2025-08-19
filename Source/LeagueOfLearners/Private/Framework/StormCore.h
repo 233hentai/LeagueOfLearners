@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "StormCore.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnGoalReachedDelegate, AActor* /*view target*/, int /*winner team*/);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnTeamInluencerUpdatedDelegate, int /*team one influencer count*/, int /*team two influencer count*/);
+
 UCLASS()
 class AStormCore : public ACharacter
 {
@@ -13,7 +16,11 @@ class AStormCore : public ACharacter
 
 public:
 	// Sets default values for this character's properties
+	FOnGoalReachedDelegate OnGoalReached;
+	FOnTeamInluencerUpdatedDelegate OnTeamInluencerUpdated;
 	AStormCore();
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	float GetProgress() const;
 
 protected:
 	// Called when the game starts or when spawned
@@ -32,6 +39,8 @@ private:
 	int TeamOneInfluencerCount = 0;
 	int TeamTwoInfluencerCount = 0;
 	float TeamWeight = 0.f;
+	float CoreCaptureSpeed = 0.f;
+	float WholeLength = 0.f;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Detection")
 	class USphereComponent* InfluenceRange;
@@ -41,6 +50,12 @@ private:
 	AActor* TeamOneGoal;
 	UPROPERTY(EditAnywhere, Category = "Team")
 	AActor* TeamTwoGoal;
+	UPROPERTY(EditAnywhere, Category = "Team")
+	AActor* TeamOneCore;
+	UPROPERTY(EditAnywhere, Category = "Team")
+	AActor* TeamTwoCore;
+	UPROPERTY(ReplicatedUsing = OnRepCoreToCapture)
+	AActor* CoreToCapture;
 	UPROPERTY()
 	class AAIController* OwnerAIC;
 	UPROPERTY(VisibleDefaultsOnly, Category = "Detection")
@@ -49,14 +64,20 @@ private:
 	float InfluenceRadius = 1000.f;
 	UPROPERTY(VisibleDefaultsOnly, Category = "Detection")
 	class UCameraComponent* ViewCamera;
-
+	UPROPERTY(EditDefaultsOnly, Category = "Move")
+	UAnimMontage* ExpandMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Move")
+	UAnimMontage* CaptureMontage;
 	UFUNCTION()
 	void NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 	void InfluencerLeftRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UFUNCTION()
+	void OnRepCoreToCapture();
 
 	void UpdateTeamWeight();
 	void UpdateGoal();
-
-
+	void GoalReached(int WinnerTeam);
+	void CaptureCore();
+	void ExpandFinished();
 };

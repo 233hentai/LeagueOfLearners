@@ -32,6 +32,8 @@ public:
 
 	virtual void SetupInputComponent() override;
 
+	void MatchFinished(AActor* ViewTarget, int WinnerTeam);
+
 private:
 	UPROPERTY()
 	class ALOLPlayerCharacter* LOLPlayerCharacter;
@@ -45,7 +47,16 @@ private:
 	class UInputMappingContext* UIInputMapping;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* ShopSwitchInputAction;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* SwitchGameplayMenuAction;
+	UPROPERTY(EditDefaultsOnly, Category = "View")
+	float MatchFinishViewBlendTimeDuration = 2.f;
 
 	void SpawnGameplayWidget();
 	void SwitchShopVisibility();
+	void SwitchGameplayMenu();
+	void ShowMatchResult();
+
+	UFUNCTION(Client,Reliable)
+	void Client_MatchFinished(AActor* ViewTarget, int WinnerTeam);
 };

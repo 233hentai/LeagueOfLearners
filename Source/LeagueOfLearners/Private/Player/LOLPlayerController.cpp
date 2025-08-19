@@ -57,7 +57,15 @@ void ALOLPlayerController::SetupInputComponent()
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
 	if (EnhancedInputComponent) {
 		EnhancedInputComponent->BindAction(ShopSwitchInputAction, ETriggerEvent::Triggered, this, &ALOLPlayerController::SwitchShopVisibility);
+		EnhancedInputComponent->BindAction(SwitchGameplayMenuAction, ETriggerEvent::Triggered, this, &ALOLPlayerController::SwitchGameplayMenu);
 	}
+}
+
+void ALOLPlayerController::MatchFinished(AActor* ViewTarget, int WinnerTeam)
+{
+	if (!HasAuthority()) return;
+	LOLPlayerCharacter->DisableInput(this);
+	Client_MatchFinished(ViewTarget, WinnerTeam);
 }
 
 void ALOLPlayerController::SpawnGameplayWidget()
@@ -75,4 +83,29 @@ void ALOLPlayerController::SwitchShopVisibility()
 	if (GameplayWidget) {
 		GameplayWidget->SwitchShopVisibility();
 	}
+}
+void ALOLPlayerController::SwitchGameplayMenu()
+{
+	if (GameplayWidget) {
+		GameplayWidget->SwitchGameplayMenu();
+	}
+}
+
+void ALOLPlayerController::ShowMatchResult()
+{
+	if (GameplayWidget) {
+		GameplayWidget->ShowGameplayMenu();
+	}
+}
+
+void ALOLPlayerController::Client_MatchFinished_Implementation(AActor* ViewTarget, int WinnerTeam)
+{
+	SetViewTargetWithBlend(ViewTarget, MatchFinishViewBlendTimeDuration);
+	FString MatchResultMessage = "Mission Success!";
+	if (GetGenericTeamId().GetId() != WinnerTeam) {
+		MatchResultMessage = "Mission Failed!";
+	}
+	GameplayWidget->SetGameplayMenuTitle(MatchResultMessage);
+	FTimerHandle ShowMatchResultTimerHandle;
+	GetWorldTimerManager().SetTimer(ShowMatchResultTimerHandle, this, &ALOLPlayerController::ShowMatchResult, MatchFinishViewBlendTimeDuration);
 }

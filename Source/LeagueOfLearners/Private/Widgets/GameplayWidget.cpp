@@ -9,6 +9,9 @@
 #include "GAS/LOLAttributeSet.h"
 #include "GAS/LOLAbilitySystemComponent.h"
 #include "Widgets/ShopWidget.h"
+#include "Components/WidgetSwitcher.h"
+#include "Components/CanvasPanel.h"
+#include "Widgets/GameplayMenu.h"
 
 void UGameplayWidget::NativeConstruct()
 {
@@ -18,6 +21,12 @@ void UGameplayWidget::NativeConstruct()
 	if (OwnerAbilitySystemComponent) {
 		HealthBar->SetAndBoundToGameplayAttribute(OwnerAbilitySystemComponent, ULOLAttributeSet::GetHealthAttribute(), ULOLAttributeSet::GetMaxHealthAttribute());
 		ManaBar->SetAndBoundToGameplayAttribute(OwnerAbilitySystemComponent, ULOLAttributeSet::GetManaAttribute(), ULOLAttributeSet::GetMaxManaAttribute());
+	}
+	SetShowMouseCursor(false);
+	SetFocusToGameOnly();
+
+	if (GameplayMenu) {
+		GameplayMenu->GetResumeButtonClickedEventDelegate().AddDynamic(this, &UGameplayWidget::SwitchGameplayMenu);
 	}
 }
 
@@ -43,6 +52,32 @@ void UGameplayWidget::SwitchShopVisibility()
 		SetShowMouseCursor(false);
 		SetFocusToGameOnly();
 	}
+}
+
+void UGameplayWidget::SwitchGameplayMenu()
+{
+	if (MainSwitcher->GetActiveWidget() == GameplayMenuRootPanel) {
+		MainSwitcher->SetActiveWidget(GameplayWidgetRootPanel);
+		SetOwningPawnInputEnabled(true);
+		SetShowMouseCursor(false);
+		SetFocusToGameOnly();
+	}
+	else {
+		ShowGameplayMenu();
+	}
+}
+
+void UGameplayWidget::ShowGameplayMenu()
+{
+	MainSwitcher->SetActiveWidget(GameplayMenuRootPanel);
+	SetOwningPawnInputEnabled(false);
+	SetShowMouseCursor(true);
+	SetFocusToGameAndUI();
+}
+
+void UGameplayWidget::SetGameplayMenuTitle(const FString& NewTitle)
+{
+	GameplayMenu->SetTitle(NewTitle);
 }
 
 void UGameplayWidget::PlayShopPopupAnimation(bool bPlayForward)
