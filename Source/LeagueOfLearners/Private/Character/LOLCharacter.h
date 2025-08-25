@@ -10,10 +10,11 @@
 #include "Abilities/GameplayAbility.h"        
 #include "GAS/LOLGameplayAbilityTypes.h"
 #include "GameplayEffectTypes.h"
+#include "Widgets/RenderActorTargetInterface.h"
 #include "LOLCharacter.generated.h"
 
 UCLASS()
-class ALOLCharacter : public ACharacter, public IAbilitySystemInterface,public IGenericTeamAgentInterface
+class ALOLCharacter : public ACharacter, public IAbilitySystemInterface,public IGenericTeamAgentInterface, public IRenderActorTargetInterface
 {
 	GENERATED_BODY()
 
@@ -28,6 +29,15 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 	const TMap<ELOLAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const;
+
+	virtual FVector GetCaptureLocalPosition() const override;
+	virtual FRotator GetCaptureLocalRotation() const override;
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Capture")
+	FVector HeadShotCaptureLocalPosition;
+	UPROPERTY(EditDefaultsOnly, Category = "Capture")
+	FRotator HeadShotCaptureLocalRotation;
 
 protected:
 	// Called when the game starts or when spawned

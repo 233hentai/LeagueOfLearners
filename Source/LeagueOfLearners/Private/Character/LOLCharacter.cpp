@@ -71,6 +71,16 @@ const TMap<ELOLAbilityInputID, TSubclassOf<UGameplayAbility>>& ALOLCharacter::Ge
 	return LOLAbilitySystemComponent->GetAbilities();
 }
 
+FVector ALOLCharacter::GetCaptureLocalPosition() const
+{
+	return HeadShotCaptureLocalPosition;
+}
+
+FRotator ALOLCharacter::GetCaptureLocalRotation() const
+{
+	return HeadShotCaptureLocalRotation;
+}
+
 // Called when the game starts or when spawned
 void ALOLCharacter::BeginPlay()
 {

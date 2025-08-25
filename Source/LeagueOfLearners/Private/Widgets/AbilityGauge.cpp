@@ -94,12 +94,14 @@ void UAbilityGauge::UpdateCooldown()
 
 const FGameplayAbilitySpec* UAbilityGauge::GetAbilitySpec()
 {
-	if (!CachedAbilitySpec) {
-		if (AbilityClassDefaultObject && OwnerAbilitySystemComponent) {
-			CachedAbilitySpec = OwnerAbilitySystemComponent->FindAbilitySpecFromClass(AbilityClassDefaultObject->GetClass());
-		}
+	if (!OwnerAbilitySystemComponent) return nullptr;
+	if (!AbilityClassDefaultObject) return nullptr;
+	if (!CachedAbilitySpecHandle.IsValid()) {
+		FGameplayAbilitySpec* FoundAbilitySpec = OwnerAbilitySystemComponent->FindAbilitySpecFromClass(AbilityClassDefaultObject->GetClass());
+		CachedAbilitySpecHandle = FoundAbilitySpec->Handle;
+		return FoundAbilitySpec;
 	}
-	return CachedAbilitySpec;
+	return OwnerAbilitySystemComponent->FindAbilitySpecFromHandle(CachedAbilitySpecHandle);
 }
 
 void UAbilityGauge::AbilitySpecUpdated(const FGameplayAbilitySpec& AbilitySpec)

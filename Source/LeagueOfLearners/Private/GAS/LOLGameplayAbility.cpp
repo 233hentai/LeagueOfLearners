@@ -124,3 +124,74 @@ void ULOLGameplayAbility::ApplyGameplayEffectToHitResultActor(const FHitResult& 
 
     ApplyGameplayEffectSpecToTarget(GetCurrentAbilitySpecHandle(), CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(HitResult.GetActor()));
 }
+
+void ULOLGameplayAbility::PlayMontageLocally(UAnimMontage* MontageToPlay)
+{
+    UAnimInstance* OwnerAnimInstance = GetOwnerAnimInstance();
+    if (OwnerAnimInstance&& !OwnerAnimInstance->Montage_IsPlaying(MontageToPlay)) {
+        OwnerAnimInstance->Montage_Play(MontageToPlay);
+    }
+}
+
+void ULOLGameplayAbility::StopMontageAfterCurrentSection(UAnimMontage* MontageToStop)
+{
+    UAnimInstance* OwnerAnimInstance = GetOwnerAnimInstance();
+    if (OwnerAnimInstance) {
+        FName CurrentSectionName = OwnerAnimInstance->Montage_GetCurrentSection(MontageToStop);
+        OwnerAnimInstance->Montage_SetNextSection(CurrentSectionName, NAME_None, MontageToStop);
+    }
+}
+
+FGenericTeamId ULOLGameplayAbility::GetOwnerTeamId() const
+{
+    IGenericTeamAgentInterface* OwnerTeamInterface = Cast<IGenericTeamAgentInterface>(GetAvatarActorFromActorInfo());
+    if (OwnerTeamInterface) {
+        return OwnerTeamInterface->GetGenericTeamId();
+    }
+    return FGenericTeamId::NoTeam;
+}
+
+AActor* ULOLGameplayAbility::GetAimTarget(float AimDistance, ETeamAttitude::Type TeamAttitude) const
+{
+    AActor* OwnerAvatarActor = GetAvatarActorFromActorInfo();
+    if (OwnerAvatarActor) {
+        FVector Location;
+        FRotator Rotation;
+        OwnerAvatarActor->GetActorEyesViewPoint(Location, Rotation);
+        FVector AimEnd = Location + Rotation.Vector() * AimDistance;
+        TArray<FHitResult> HitResults;
+        FCollisionQueryParams CollisionQueryParams;
+        CollisionQueryParams.AddIgnoredActor(OwnerAvatarActor);
+        FCollisionObjectQueryParams CollisionObjectQueryParams;
+        CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+        if (ShouldDrawDebug()) {
+            DrawDebugLine(GetWorld(), Location, AimEnd, FColor::Red, false, 2.f, 0U, 3.f);
+        }
+        if (GetWorld()->LineTraceMultiByObjectType(HitResults, Location, AimEnd, CollisionObjectQueryParams, CollisionQueryParams)) {
+            for(FHitResult& HitResult:HitResults){
+                if (IsActorTeamAttitudeIs(HitResult.GetActor(), TeamAttitude)) {
+                    return HitResult.GetActor();
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
+bool ULOLGameplayAbility::IsActorTeamAttitudeIs(const AActor* OtherActor, ETeamAttitude::Type TeamAttitude) const
+{
+    if (!OtherActor) return false;
+    IGenericTeamAgentInterface* OwnerTeamInterface = Cast<IGenericTeamAgentInterface>(GetAvatarActorFromActorInfo());
+    if (OwnerTeamInterface) {
+        return OwnerTeamInterface->GetTeamAttitudeTowards(*OtherActor) == TeamAttitude;
+    }
+    return false;
+}
+
+void ULOLGameplayAbility::SendLocalGameplayEvent(const FGameplayTag& EventTag, const FGameplayEventData& EventData)
+{
+    UAbilitySystemComponent* OwnerASC = GetAbilitySystemComponentFromActorInfo();
+    if (OwnerASC) {
+        OwnerASC->HandleGameplayEvent(EventTag, &EventData);
+    }
+}

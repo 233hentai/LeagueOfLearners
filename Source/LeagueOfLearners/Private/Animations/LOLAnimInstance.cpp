@@ -31,7 +31,11 @@ void ULOLAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		FRotator BodyRotationDelta = UKismetMathLibrary::NormalizedDeltaRotator(BodyRotation,BodyRotationPrevious);
 		BodyRotationPrevious = BodyRotation;
 		YawSpeed = BodyRotationDelta.Yaw / DeltaSeconds;
-		SmoothedYawSpeed = UKismetMathLibrary::FInterpTo(SmoothedYawSpeed,YawSpeed,DeltaSeconds,YawSpeedSmoothLerpSpeed);
+		float YawLerpSpeed = YawSpeedSmoothLerpSpeed;
+		if (YawSpeed == 0) {
+			YawLerpSpeed = YawSpeedLerpToZeroSpeed;
+		}
+		SmoothedYawSpeed = UKismetMathLibrary::FInterpTo(SmoothedYawSpeed,YawSpeed,DeltaSeconds, YawLerpSpeed);
 
 		FRotator ControlRotation = OwnerCharacter->GetBaseAimRotation();
 		LookRotationOffset = UKismetMathLibrary::NormalizedDeltaRotator(ControlRotation,BodyRotation);

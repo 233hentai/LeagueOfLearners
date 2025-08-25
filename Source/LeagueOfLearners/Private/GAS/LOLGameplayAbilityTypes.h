@@ -11,6 +11,7 @@ enum class ELOLAbilityInputID :uint8
 {
 	None						UMETA(DisplayName = "None"),
 	BasicAttack					UMETA(DisplayName = "Basic Attack"),
+	Aim							UMETA(DisplayName = "Aim"),
 	Ability1					UMETA(DisplayName = "Ability 1"),
 	Ability2					UMETA(DisplayName = "Ability 2"),
 	Ability3					UMETA(DisplayName = "Ability 3"),

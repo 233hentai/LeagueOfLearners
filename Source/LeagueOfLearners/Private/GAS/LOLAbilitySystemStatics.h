@@ -22,6 +22,7 @@ public:
 	static FGameplayTag GetDeadStatTag();
 	static FGameplayTag GetStunStatTag();
 	static FGameplayTag GetBasicAttackInputPressedTag();
+	static FGameplayTag GetBasicAttackInputReleasedTag();
 	static FGameplayTag GetAimStatTag();
 	static FGameplayTag GetCameraShakeCueTag();
 	static FGameplayTag GetHealthFullTag();
@@ -31,8 +32,12 @@ public:
 	static FGameplayTag GetHeroRoleTag();
 	static FGameplayTag GetExperienceAttributeTag();
 	static FGameplayTag GetGoldAttributeTag();
+	static FGameplayTag GetCrosshairTag();
+	static FGameplayTag GetTargetUpdatedTag();
 
+	static bool IsActorDead(AActor* Actor);
 	static bool IsHero(const AActor* Actor);
+	static bool ActorHasTag(const AActor* ActorToCheck, const FGameplayTag& Tag);
 	static bool IsAbilityAtMaxLevel(const FGameplayAbilitySpec& Spec);
 
 	static float GetStaticCooldownDurationForAbility(const class UGameplayAbility* Ability);

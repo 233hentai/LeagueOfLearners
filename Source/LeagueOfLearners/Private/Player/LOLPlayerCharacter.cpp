@@ -67,6 +67,12 @@ void ALOLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 }
 
+void ALOLPlayerCharacter::GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const
+{
+	OutLocation = ViewCamera->GetComponentLocation();
+	OutRotation = GetBaseAimRotation();
+}
+
 
 void ALOLPlayerCharacter::HandleLookInput(const FInputActionValue& InputActionValue)
 {
@@ -109,7 +115,8 @@ void ALOLPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActio
 	}
 
 	if (InputID == ELOLAbilityInputID::BasicAttack) {
-		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,ULOLAbilitySystemStatics::GetBasicAttackInputPressedTag(), FGameplayEventData());
+		FGameplayTag BasicAttackTag = bPressed ? ULOLAbilitySystemStatics::GetBasicAttackInputPressedTag() : ULOLAbilitySystemStatics::GetBasicAttackInputReleasedTag();
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,BasicAttackTag, FGameplayEventData());
 		Server_SendGameplayEventsToSelf(ULOLAbilitySystemStatics::GetBasicAttackInputPressedTag(), FGameplayEventData());
 	}
 }
@@ -156,9 +163,7 @@ void ALOLPlayerCharacter::OnRecoverFromStun()
 
 void ALOLPlayerCharacter::OnAimStateChanged(bool bIsAiming)
 {
-	if (IsControlledByLocalPlayer()) {
-		LerpCameraToLocalOffsetLocation(bIsAiming ? CameraAimLocalOffset : FVector{ 0.f });
-	}
+	LerpCameraToLocalOffsetLocation(bIsAiming ? CameraAimLocalOffset : FVector{ 0.f });
 }
 
 void ALOLPlayerCharacter::LerpCameraToLocalOffsetLocation(const FVector& Goal)

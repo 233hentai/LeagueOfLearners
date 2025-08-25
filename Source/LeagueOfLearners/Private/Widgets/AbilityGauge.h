@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"
 #include "GameplayEffectTypes.h"
+#include "GameplayAbilitySpecHandle.h"
 #include "AbilityGauge.generated.h"
 
 class UAbilitySystemComponent;
@@ -76,7 +77,7 @@ private:
 	void UpdateCooldown();
 
 	const UAbilitySystemComponent* OwnerAbilitySystemComponent;
-	const FGameplayAbilitySpec* CachedAbilitySpec;
+	FGameplayAbilitySpecHandle CachedAbilitySpecHandle;
 	bool bIsAbilityLearned = false;
 
 	const FGameplayAbilitySpec* GetAbilitySpec();
