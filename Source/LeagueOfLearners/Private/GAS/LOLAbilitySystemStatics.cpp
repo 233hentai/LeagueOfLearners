@@ -38,6 +38,11 @@ FGameplayTag ULOLAbilitySystemStatics::GetAimStatTag()
 	return FGameplayTag::RequestGameplayTag("Stats.Aim");
 }
 
+FGameplayTag ULOLAbilitySystemStatics::GetFocusStatTag()
+{
+	return FGameplayTag::RequestGameplayTag("Stats.Focus");
+}
+
 FGameplayTag ULOLAbilitySystemStatics::GetCameraShakeCueTag()
 {
 	return FGameplayTag::RequestGameplayTag("GameplayCue.CameraShake");

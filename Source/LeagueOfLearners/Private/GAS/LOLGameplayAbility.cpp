@@ -106,6 +106,22 @@ void ULOLGameplayAbility::PushTargets(const FGameplayAbilityTargetDataHandle& Ta
     PushTargets(Targets,PushVelocity);
 }
 
+void ULOLGameplayAbility::PushTargetsFromLocation(const FGameplayAbilityTargetDataHandle& TargetDataHandle, const FVector& FromLocation, float PushSpeed)
+{
+    TArray<AActor*> Targets = UAbilitySystemBlueprintLibrary::GetAllActorsFromTargetData(TargetDataHandle);
+    PushTargetsFromLocation(Targets, FromLocation, PushSpeed);
+}
+
+void ULOLGameplayAbility::PushTargetsFromLocation(const TArray<AActor*>& Targets, const FVector& FromLocation, float PushSpeed)
+{
+    for (AActor* Target : Targets) {
+        FVector PushDirection = Target->GetActorLocation() - FromLocation;
+        PushDirection.Z = 0;
+        PushDirection.Normalize();
+        PushTarget(Target, PushDirection * PushSpeed);
+    }
+}
+
 ACharacter* ULOLGameplayAbility::GetOwningAvatarActor()
 {
     if (!AvatarCharacter) {

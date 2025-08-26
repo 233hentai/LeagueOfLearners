@@ -24,6 +24,7 @@ public:
 	static FGameplayTag GetBasicAttackInputPressedTag();
 	static FGameplayTag GetBasicAttackInputReleasedTag();
 	static FGameplayTag GetAimStatTag();
+	static FGameplayTag GetFocusStatTag();
 	static FGameplayTag GetCameraShakeCueTag();
 	static FGameplayTag GetHealthFullTag();
 	static FGameplayTag GetHealthEmptyTag();

@@ -83,6 +83,7 @@ void ALOLPlayerCharacter::HandleLookInput(const FInputActionValue& InputActionVa
 
 void ALOLPlayerCharacter::HandleMoveInput(const FInputActionValue& InputActionValue)
 {
+	if (GetInFocusMode()) return;
 	FVector2D InputValue = InputActionValue.Get<FVector2D>();
 	InputValue.Normalize();
 	AddMovementInput(GetMoveForwardDirection()*InputValue.Y+GetLookRightDirection()*InputValue.X);

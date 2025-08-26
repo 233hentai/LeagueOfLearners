@@ -30,6 +30,8 @@ protected:
 	void PushTarget(AActor* Target,const FVector& PushVelocity);
 	void PushTargets(const TArray<AActor*>& Targets, const FVector& PushVelocity);
 	void PushTargets(const FGameplayAbilityTargetDataHandle& TargetDataHandle, const FVector& PushVelocity);
+	void PushTargetsFromLocation(const FGameplayAbilityTargetDataHandle& TargetDataHandle, const FVector& FromLocation, float PushSpeed);
+	void PushTargetsFromLocation(const TArray<AActor*>& Targets, const FVector& FromLocation, float PushSpeed);
 	ACharacter* GetOwningAvatarActor();
 	void ApplyGameplayEffectToHitResultActor(const FHitResult& HitResult,TSubclassOf<UGameplayEffect> GameplayEffect,int level=1);
 	void PlayMontageLocally(UAnimMontage* MontageToPlay);

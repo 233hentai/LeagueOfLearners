@@ -153,6 +153,7 @@ void ALOLCharacter::BindGASChangeDelegates()
 		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ALOLCharacter::DeathTagUpdated);
 		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetStunStatTag()).AddUObject(this, &ALOLCharacter::StunTagUpdated);
 		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetAimStatTag()).AddUObject(this, &ALOLCharacter::AimTagUpdated);
+		LOLAbilitySystemComponent->RegisterGameplayTagEvent(ULOLAbilitySystemStatics::GetFocusStatTag()).AddUObject(this, &ALOLCharacter::FocusTagUpdated);
 		
 		LOLAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(ULOLAttributeSet::GetMoveSpeedAttribute()).AddUObject(this,&ALOLCharacter::MoveSpeedUpdated);
 		LOLAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(ULOLAttributeSet::GetMaxHealthAttribute()).AddUObject(this,&ALOLCharacter::MaxHealthUpdated);
@@ -187,6 +188,11 @@ void ALOLCharacter::StunTagUpdated(const FGameplayTag Tag, int32 NewCount)
 void ALOLCharacter::AimTagUpdated(const FGameplayTag Tag, int32 NewCount)
 {
 	SetIsAiming(NewCount!=0);
+}
+
+void ALOLCharacter::FocusTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+	bInFocusMode = NewCount > 0;
 }
 
 void ALOLCharacter::SetIsAiming(bool bIsAiming)
