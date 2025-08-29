@@ -22,7 +22,7 @@ void UGA_Shoot::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		K2_EndAbility();
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Shoot Ability Activated"));
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot Ability Activated"));
 	if (HasAuthorityOrPredictionKey(ActorInfo,&ActivationInfo)) {
 		UAbilityTask_WaitGameplayEvent* WaitStartShootEvent = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, ULOLAbilitySystemStatics::GetBasicAttackInputPressedTag());
 		WaitStartShootEvent->EventReceived.AddDynamic(this, &UGA_Shoot::StartShooting);
@@ -40,7 +40,7 @@ void UGA_Shoot::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 
 void UGA_Shoot::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot ability ended"));
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot ability ended"));
 	K2_EndAbility();
 }
 
@@ -62,7 +62,7 @@ FGameplayTag UGA_Shoot::GetShootTag()
 
 void UGA_Shoot::StartShooting(FGameplayEventData EventData)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Start Shooting"));
+	//UE_LOG(LogTemp, Warning, TEXT("Start Shooting"));
 	if (HasAuthority(&CurrentActivationInfo)) {
 		UAbilityTask_PlayMontageAndWait* PlayShootMontage = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, ShootMontage);
 		PlayShootMontage->ReadyForActivation();
@@ -76,7 +76,7 @@ void UGA_Shoot::StartShooting(FGameplayEventData EventData)
 
 void UGA_Shoot::StopShooting(FGameplayEventData EventData)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Stop Shooting"));
+	//UE_LOG(LogTemp, Warning, TEXT("Stop Shooting"));
 	if (ShootMontage) {
 		StopMontageAfterCurrentSection(ShootMontage);
 	}
@@ -85,7 +85,7 @@ void UGA_Shoot::StopShooting(FGameplayEventData EventData)
 
 void UGA_Shoot::ShootProjectile(FGameplayEventData EventData)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot Projectile"));
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot Projectile"));
 	if (K2_HasAuthority()) {
 		AActor* OwnerAvatarActor = GetAvatarActorFromActorInfo();
 		FActorSpawnParameters SpawnParameters;

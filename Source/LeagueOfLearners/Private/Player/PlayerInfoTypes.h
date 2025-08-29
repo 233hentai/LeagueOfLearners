@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "PlayerInfoTypes.generated.h"
 
+class UPA_HeroDefinition;
 class APlayerState;
 USTRUCT()
 struct FPlayerSelection
@@ -20,6 +21,9 @@ public:
 	FORCEINLINE FUniqueNetIdRepl GetPlayerUniqueId() const { return PlayerUniqueId; }
 	FORCEINLINE FString GetPlayerNickName() const { return PlayerNickName; }
 
+	FORCEINLINE const UPA_HeroDefinition* GetHeroDefinition() const { return HeroDefinition; }
+	FORCEINLINE void SetHeroDefinition(const UPA_HeroDefinition* NewHeroDefinition) { HeroDefinition = NewHeroDefinition; }
+
 	bool IsForPlayer(const APlayerState* PlayerState) const;
 	bool IsValid() const;
 
@@ -32,4 +36,7 @@ private:
 	FUniqueNetIdRepl PlayerUniqueId;
 	UPROPERTY()
 	FString PlayerNickName;
+	UPROPERTY()
+	TObjectPtr<const UPA_HeroDefinition> HeroDefinition = nullptr;
+	//const UPA_HeroDefinition* HeroDefinition;
 };

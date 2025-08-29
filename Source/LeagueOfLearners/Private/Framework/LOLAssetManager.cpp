@@ -2,6 +2,7 @@
 
 
 #include "Framework/LOLAssetManager.h"
+#include "Character/PA_HeroDefinition.h"
 
 ULOLAssetManager& ULOLAssetManager::Get()
 {
@@ -36,6 +37,24 @@ const FItemCollection* ULOLAssetManager::GetCombinationForItem(const UPA_ShopIte
 const FItemCollection* ULOLAssetManager::GetIngredientForItem(const UPA_ShopItem* Item) const
 {
 	return IngredientMap.Find(Item);
+}
+
+
+void ULOLAssetManager::LoadHeroDefinitions(const FStreamableDelegate& LoadFinishedCallback)
+{
+	LoadPrimaryAssetsWithType(UPA_HeroDefinition::GetHeroDefinitionAssetType(), TArray<FName>(), LoadFinishedCallback);
+}
+
+bool ULOLAssetManager::GetLoadedHeroDefinitions(TArray<UPA_HeroDefinition*>& LoadedHeroDefinitions) const
+{
+	TArray<UObject*> LoadedObjects;
+	bool bLoaded = GetPrimaryAssetObjectList(UPA_HeroDefinition::GetHeroDefinitionAssetType(), LoadedObjects);
+	if (bLoaded) {
+		for (UObject* LoadedObject : LoadedObjects) {
+			LoadedHeroDefinitions.Add(Cast<UPA_HeroDefinition>(LoadedObject));
+		}
+	}
+	return bLoaded;
 }
 
 void ULOLAssetManager::ShopItemLoadFinished(FStreamableDelegate Callback)

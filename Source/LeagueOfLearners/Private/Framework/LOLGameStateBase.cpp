@@ -26,6 +26,22 @@ void ALOLGameStateBase::RequestPlayerSelectionChange(const APlayerState* Request
 	OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
 }
 
+
+void ALOLGameStateBase::SetCharacterSelected(const APlayerState* RequestingPlayer, const UPA_HeroDefinition* SelectedCharacter)
+{
+	if (IsDefinitionSelected(SelectedCharacter)) return;
+	FPlayerSelection* FoundPlayerSelection = PlayerSelectionArray.FindByPredicate(
+		[&](const FPlayerSelection& PlayerSelection)
+		{
+			return PlayerSelection.IsForPlayer(RequestingPlayer);
+		}
+	);
+	if (FoundPlayerSelection) {
+		FoundPlayerSelection->SetHeroDefinition(SelectedCharacter);
+		OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
+	}
+}
+
 bool ALOLGameStateBase::IsSlotOccupied(uint8 SlotId) const
 {
 	for (const FPlayerSelection& PlayerSelection : PlayerSelectionArray) {
@@ -34,10 +50,53 @@ bool ALOLGameStateBase::IsSlotOccupied(uint8 SlotId) const
 	return false;
 }
 
+bool ALOLGameStateBase::IsDefinitionSelected(const UPA_HeroDefinition* Definition) const
+{
+	const FPlayerSelection* FoundPlayerSelection = PlayerSelectionArray.FindByPredicate(
+		[&](const FPlayerSelection& PlayerSelection)
+		{
+			return PlayerSelection.GetHeroDefinition() == Definition;
+		}
+	);
+	return FoundPlayerSelection != nullptr;
+}
+
+
 const TArray<FPlayerSelection>& ALOLGameStateBase::GetPlayerSelection() const
 {
 	return PlayerSelectionArray;
 }
+
+bool ALOLGameStateBase::CanStartHeroSelection() const
+{
+	return PlayerSelectionArray.Num() == PlayerArray.Num();
+}
+
+void ALOLGameStateBase::SetCharacterDeselected(const UPA_HeroDefinition* DefinitionToDeselect)
+{
+	if (!DefinitionToDeselect) return;
+	FPlayerSelection* FoundPlayerSelection = PlayerSelectionArray.FindByPredicate(
+		[&](const FPlayerSelection& PlayerSelection)
+		{
+			return PlayerSelection.GetHeroDefinition() == DefinitionToDeselect;
+		}
+	);
+	if (FoundPlayerSelection) {
+		FoundPlayerSelection->SetHeroDefinition(nullptr);
+		OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
+	}
+}
+
+bool ALOLGameStateBase::CanStartMatch() const
+{
+	for (const FPlayerSelection& PlayerSelection : PlayerSelectionArray) {
+		if (PlayerSelection.GetHeroDefinition() == nullptr) {
+			return false;
+		}
+	}
+	return true;
+}
+
 
 void ALOLGameStateBase::OnRep_PlayerSelectionArray()
 {

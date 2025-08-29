@@ -62,6 +62,8 @@ private:
 	FName UpgradePointAvailableParamName = "UpgradeAvailable";
 	UPROPERTY()
 	class UGameplayAbility* AbilityClassDefaultObject;
+	UPROPERTY(EditDefaultsOnly, Category = "Tool Tip")
+	TSubclassOf<class UAbilityToolTip> AbilityToolTipClass;
 
 	void AbilityCommited(UGameplayAbility* Ability);
 	void StartCooldown(float CooldownTimeRemaining,float CooldownDuration);
@@ -85,4 +87,6 @@ private:
 	void UpdateCanCast();
 	void UpgradePointUpdated(const FOnAttributeChangeData& Data);
 	void ManaUpdated(const FOnAttributeChangeData& Data);
+
+	void CreateToolTip(const FAbilityWidgetData* AbilityWidgetData);
 };

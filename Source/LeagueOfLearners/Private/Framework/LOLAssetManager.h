@@ -7,6 +7,7 @@
 #include "Inventory/PA_ShopItem.h"
 #include "LOLAssetManager.generated.h"
 
+class UPA_HeroDefinition;
 /**
  * 
  */
@@ -21,6 +22,9 @@ public:
 	bool GetLoadedShopItems(TArray<const UPA_ShopItem*>& OutItems) const;
 	const FItemCollection* GetCombinationForItem(const UPA_ShopItem* Item) const;
 	const FItemCollection* GetIngredientForItem(const UPA_ShopItem* Item) const;
+
+	void LoadHeroDefinitions(const FStreamableDelegate& LoadFinishedCallback);
+	bool GetLoadedHeroDefinitions(TArray<UPA_HeroDefinition*>& LoadedHeroDefinitions) const;
 
 private:
 	void ShopItemLoadFinished(FStreamableDelegate Callback);

@@ -7,6 +7,8 @@
 #include "Player/PlayerInfoTypes.h"
 #include "LOLGameStateBase.generated.h"
 
+class UPA_HeroDefinition;
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerSelectionUpdated,const TArray<FPlayerSelection>& /*NewPlayerSelection*/);
 /**
  * 
@@ -20,8 +22,14 @@ public:
 	FOnPlayerSelectionUpdated OnPlayerSelectionUpdated;
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 	void RequestPlayerSelectionChange(const APlayerState* RequestingPlayer, uint8 DesiredSlot);
+	void SetCharacterSelected(const APlayerState* RequestingPlayer, const UPA_HeroDefinition* SelectedCharacter);
 	bool IsSlotOccupied(uint8 SlotId) const;
+	bool IsDefinitionSelected(const UPA_HeroDefinition* Definition) const;
 	const TArray<FPlayerSelection>& GetPlayerSelection() const;
+	bool CanStartHeroSelection() const;
+	void SetCharacterDeselected(const UPA_HeroDefinition* DefinitionToDeselect);
+	bool CanStartMatch() const;
+
 private:
 	UPROPERTY(ReplicatedUsing = OnRep_PlayerSelectionArray)
 	TArray<FPlayerSelection> PlayerSelectionArray;

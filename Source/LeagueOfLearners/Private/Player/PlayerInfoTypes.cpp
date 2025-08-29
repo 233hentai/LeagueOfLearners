@@ -5,17 +5,20 @@
 #include "GameFramework/PlayerState.h"
 #include "Network/LOLNetStatics.h"
 
-FPlayerSelection::FPlayerSelection() :Slot{ GetInvalidSlot() }, PlayerUniqueId{ FUniqueNetIdRepl::Invalid() }, PlayerNickName{}
+//FPlayerSelection::FPlayerSelection() :Slot{ GetInvalidSlot() }, PlayerUniqueId{ FUniqueNetIdRepl::Invalid() }, PlayerNickName{}
+FPlayerSelection::FPlayerSelection() :Slot{ GetInvalidSlot() }, PlayerUniqueId{ FUniqueNetIdRepl::Invalid() }, PlayerNickName{}, HeroDefinition(nullptr)
 {
 }
 
-FPlayerSelection::FPlayerSelection(uint8 InSlot, const APlayerState* InPlayerState) :Slot{InSlot}
+//FPlayerSelection::FPlayerSelection(uint8 InSlot, const APlayerState* InPlayerState) :Slot{InSlot}
+FPlayerSelection::FPlayerSelection(uint8 InSlot, const APlayerState* InPlayerState) :Slot{InSlot}, HeroDefinition(nullptr)
 {
 	if (InPlayerState) {
 		PlayerUniqueId = InPlayerState->GetUniqueId();
 		PlayerNickName = InPlayerState->GetPlayerName();
 	}
 }
+
 
 bool FPlayerSelection::IsForPlayer(const APlayerState* PlayerState) const
 {
@@ -31,6 +34,8 @@ bool FPlayerSelection::IsForPlayer(const APlayerState* PlayerState) const
 bool FPlayerSelection::IsValid() const
 {
 #if WITH_EDITOR
+	if (Slot == GetInvalidSlot()) return false;
+	if (Slot >= ULOLNetStatics::GetPlayerCountPerTeam() * 2) return false;
 	return true;
 #else
 	if (!PlayerUniqueId.IsValid()) return false;
@@ -39,6 +44,18 @@ bool FPlayerSelection::IsValid() const
 	return true;
 #endif
 }
+
+//bool FPlayerSelection::IsValid() const
+//{
+//#if WITH_EDITOR
+//	return true;
+//#else
+//	if (!PlayerUniqueId.IsValid()) return false;
+//	if (Slot == GetInvalidSlot()) return false;
+//	if (Slot >= ULOLNetStatics::GetPlayerCountPerTeam() * 2) return false;
+//	return true;
+//#endif
+//}
 
 uint8 FPlayerSelection::GetInvalidSlot()
 {

@@ -6,6 +6,8 @@
 #include "EngineUtils.h"
 #include "Framework/StormCore.h"
 #include "Player/LOLPlayerController.h"
+#include "Player/LOLPlayerState.h"
+#include "GameFramework/Controller.h"
 
 APlayerController* ALOLGameModeBase::SpawnPlayerController(ENetRole InRemoteRole, const FString& Options)
 {
@@ -30,8 +32,33 @@ void ALOLGameModeBase::StartPlay()
     }
 }
 
-FGenericTeamId ALOLGameModeBase::GetTeamIDForPlayer(const APlayerController* PlayerController) const
+UClass* ALOLGameModeBase::GetDefaultPawnClassForController_Implementation(AController* Controller)
 {
+    ALOLPlayerState* LOLPlayerState = Controller->GetPlayerState<ALOLPlayerState>();
+    if (LOLPlayerState && LOLPlayerState->GetSelectedPawnClass()) {
+        return LOLPlayerState->GetSelectedPawnClass();
+    }
+    return BackupPawn;
+}
+
+APawn* ALOLGameModeBase::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
+{
+    IGenericTeamAgentInterface* NewPlayerTeamInterface = Cast<IGenericTeamAgentInterface>(NewPlayer);
+    FGenericTeamId TeamId = GetTeamIDForPlayer(NewPlayer);
+    if (NewPlayerTeamInterface) {
+        NewPlayerTeamInterface->SetGenericTeamId(TeamId);
+    }
+    StartSpot = FindNextStartSpotForTeam(TeamId);
+    NewPlayer->StartSpot = StartSpot;
+    return Super::SpawnDefaultPawnFor_Implementation(NewPlayer, StartSpot);
+}
+
+FGenericTeamId ALOLGameModeBase::GetTeamIDForPlayer(const AController* InController) const
+{
+    ALOLPlayerState* LOLPlayerState = InController->GetPlayerState<ALOLPlayerState>();
+    if (LOLPlayerState && LOLPlayerState->GetSelectedPawnClass()) {
+        return LOLPlayerState->GetTeamIdBasedOnSlot();
+    }
     static int PlayerCount = 0;
     ++PlayerCount;
     return FGenericTeamId(PlayerCount%2);

@@ -10,6 +10,7 @@
 #include "AbilitySystemComponent.h"
 #include "GAS/LOLHeroAttributeSet.h"
 #include "GAS/LOLAttributeSet.h"
+#include "Widgets/AbilityToolTip.h"
 
 void UAbilityGauge::NativeConstruct()
 {
@@ -50,6 +51,7 @@ void UAbilityGauge::ConfigureWithWidgetData(const FAbilityWidgetData* WidgetData
 	if (Icon && WidgetData) {
 		Icon->GetDynamicMaterial()->SetTextureParameterValue(IconMaterialParamName, WidgetData->Icon.LoadSynchronous());
 	}
+	CreateToolTip(WidgetData);
 }
 
 void UAbilityGauge::AbilityCommited(UGameplayAbility* Ability)
@@ -145,4 +147,16 @@ void UAbilityGauge::UpgradePointUpdated(const FOnAttributeChangeData& Data)
 void UAbilityGauge::ManaUpdated(const FOnAttributeChangeData& Data)
 {
 	UpdateCanCast();
+}
+
+void UAbilityGauge::CreateToolTip(const FAbilityWidgetData* AbilityWidgetData)
+{
+	if (!AbilityWidgetData || !AbilityToolTipClass) return;
+	UAbilityToolTip* NewAbilityToolTip = CreateWidget<UAbilityToolTip>(GetOwningPlayer(), AbilityToolTipClass);
+	if (NewAbilityToolTip) {
+		float CooldownDuration = ULOLAbilitySystemStatics::GetStaticCooldownDurationForAbility(AbilityClassDefaultObject);
+		float Cost = ULOLAbilitySystemStatics::GetStaticCostForAbility(AbilityClassDefaultObject);
+		NewAbilityToolTip->SetAbilityInfo(AbilityWidgetData->AbilityName, AbilityWidgetData->Icon.LoadSynchronous(), AbilityWidgetData->Description, CooldownDuration, Cost);
+		SetToolTip(NewAbilityToolTip);
+	}
 }
